@@ -19,7 +19,7 @@ class Relu(ActivationFunction):
         return 0 if value <= 0 else 1
 
     def calculate(self, value: float) -> float:
-        return max(0, value)
+        return max(0.0, value)
 
 
 class Sigmoid(ActivationFunction):
@@ -28,7 +28,7 @@ class Sigmoid(ActivationFunction):
         return self.calculate(value) * (1 - self.calculate(value))
 
     def calculate(self, value: float) -> float:
-        return 1 / (1 + math.e ** -value)
+        return 1 / (1 + math.exp(-value))
 
 
 class TanH(ActivationFunction):
