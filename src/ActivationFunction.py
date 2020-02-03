@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-import math
+import numpy as np
 
 
 # TODO: check this: https://stackoverflow.com/questions/42594695/how-to-apply-a-function-map-values-of-each-element
@@ -9,36 +9,36 @@ import math
 class ActivationFunction(ABC):
 
     @abstractmethod
-    def calculate(self, value: float) -> float:
+    def calculate(self, value: np.ndarray) -> np.ndarray:
         pass
 
     @abstractmethod
-    def calculate_derivative(self, value: float) -> float:
+    def calculate_derivative(self, value: np.ndarray) -> np.ndarray:
         pass
 
 
 class Relu(ActivationFunction):
 
-    def calculate_derivative(self, value: float) -> float:
-        return 0 if value <= 0 else 1
+    def calculate_derivative(self, value: np.ndarray) -> np.ndarray:
+        return np.vectorize(lambda x: 0 if x <= 0 else 1)(value)
 
-    def calculate(self, value: float) -> float:
-        return max(0.0, value)
+    def calculate(self, value: np.ndarray) -> np.ndarray:
+        return np.vectorize(lambda x: max(0.0, x))(value)
 
 
 class Sigmoid(ActivationFunction):
 
-    def calculate_derivative(self, value: float) -> float:
+    def calculate_derivative(self, value: np.ndarray) -> np.ndarray:
         return self.calculate(value) * (1 - self.calculate(value))
 
-    def calculate(self, value: float) -> float:
-        return 1 / (1 + math.exp(-value))
+    def calculate(self, value: np.ndarray) -> np.ndarray:
+        return 1 / (1 + np.exp(-value))
 
 
 class TanH(ActivationFunction):
 
-    def calculate_derivative(self, value: float) -> float:
-        return 1 - math.tanh(value) ** 2
+    def calculate_derivative(self, value: np.ndarray) -> np.ndarray:
+        return 1 - np.tanh(value) ** 2
 
-    def calculate(self, value: float) -> float:
-        return math.tanh(value)
+    def calculate(self, value: np.ndarray) -> np.ndarray:
+        return np.tanh(value)
