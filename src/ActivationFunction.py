@@ -2,6 +2,10 @@ from abc import ABC, abstractmethod
 import math
 
 
+# TODO: check this: https://stackoverflow.com/questions/42594695/how-to-apply-a-function-map-values-of-each-element
+#  -in-a-2d-numpy-array-matrix
+# and this https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.expit.html
+
 class ActivationFunction(ABC):
 
     @abstractmethod

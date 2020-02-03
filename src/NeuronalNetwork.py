@@ -1,32 +1,43 @@
-from src.ActivationFunction import *
 from typing import List
+
 import numpy as np
+
+from typing import Tuple
+
+from src.ActivationFunction import *
 
 
 class Layer:
-    num_neurons = 0
-    bias = np.array(0, 0)
-    weight = np.array(0, 0)
-    activationFunction: ActivationFunction = Relu()
+    num_neurons: int = None
+    bias: np.ndarray = None
+    weight: np.ndarray = None
+    activationFunction: ActivationFunction = None
 
-    def __init__(self, num_neurons: int, prev_num_neurons: int, activation_function: ActivationFunction):
+    def __init__(self, num_neurons: int, prev_num_neurons: int, activation_function: ActivationFunction = Relu()):
         self.num_neurons = num_neurons
         self.bias = np.random.rand(num_neurons, 1)
         self.activationFunction = activation_function
         self.weight = np.random.rand(prev_num_neurons, num_neurons)
 
+    def forward(self, x_input: np.ndarray) -> np.ndarray:
+        return np.vectorize(self.activationFunction.calculate)(self.weight.T * x_input + self.bias)
+
 
 class NeuronalNetwork:
-    num_inputs: int = 0
-    num_output: int = 0
-    hidden_layers: List[Layer] = []
+    num_inputs: int = None
+    num_output: int = None
+    hidden_layers: List[Layer] = None
 
-    def __init__(self, num_inputs: int, num_output: int):
-        self.hidden_layers = []
-        self.num_inputs = num_inputs
+    def __init__(self, num_inputs: int, hidden_architecture: List[Tuple[int, ActivationFunction]], num_output: int):
         self.num_output = num_output
+        self.num_inputs = num_inputs
 
-    def add_hidden_layer(self, num_neurons: int, activation_function: ActivationFunction):
+        self.hidden_layers = []
+        for layer in hidden_architecture:
+            self.__add_hidden_layer(layer[0], layer[1])
+        self.__add_hidden_layer(num_output, Sigmoid())
+
+    def __add_hidden_layer(self, num_neurons: int, activation_function: ActivationFunction):
         prev_num_neurons = self.__get_prev_num_neurons()
         new_layer = Layer(num_neurons, prev_num_neurons, activation_function)
         self.hidden_layers.append(new_layer)
@@ -41,8 +52,10 @@ class NeuronalNetwork:
     def train(self):
         pass
 
-    def forward(self):
-        pass
+    def forward(self, x_input: np.ndarray) -> np.ndarray:
+        for layer in self.hidden_layers:
+            x_input = layer.forward(x_input)
+        return x_input
 
     def back_propagation(self):
         pass
