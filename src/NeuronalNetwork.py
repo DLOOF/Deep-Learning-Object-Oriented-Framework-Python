@@ -72,24 +72,19 @@ class NeuronalNetwork:
     def back_propagation(self, result, expected) -> Tuple[List[np.ndarray], List[np.ndarray]]:
         bias = []
         weight = []
-        activations = self.forward(result)
 
-        layer = self.hidden_layers[-1]
-        derivative = layer.activationFunction.calculate_derivative
-        z = layer.last_output
-        delta = self.cost_function.calculate(activations, expected) * derivative(z)
-
-        bias.append(delta)
-        weight.append(np.dot(delta, layer.last_input.T))
+        gradient = self.cost_function.calculate_derivative(result, expected)
 
         # FIXME check index out of the range
         for layer in self.hidden_layers[::-1]:
             z = layer.last_output
-            derivative = layer.activationFunction.calculate_derivative
-            sp = derivative(z)
-            delta = np.dot(layer.weight.T, delta) * sp
 
-            bias.append(delta)
-            weight.append(np.dot(delta, layer.last_input.T))
+            # element-wise multiplication
+            gradient = np.multiply(gradient, layer.activationFunction.calculate_derivative(z))
+
+            bias.append(gradient)
+            weight.append(np.dot(gradient, layer.last_input.T))
+
+            gradient = np.dot(layer.weight.T, gradient) 
 
         return bias, weight
