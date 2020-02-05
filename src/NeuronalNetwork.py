@@ -1,3 +1,4 @@
+import time
 from typing import List
 from typing import Tuple
 
@@ -62,7 +63,32 @@ class NeuronalNetwork:
             return self.hidden_layers[-1].num_neurons
 
     def train(self, data: np.ndarray, learning_rate: float = 0.001, iterations: int = 1000):
-        pass
+        print("Starting training!")
+        tic = time.time()
+        data_shape = data.shape
+        matrix_depth = data_shape[1]
+        expected_output = self.__get_column(data, matrix_depth)
+        training_matrix = self.__get_columns_between_a_and_b(data, 0, matrix_depth - 1)
+
+        for i in range(iterations):
+            for j, example in enumerate(training_matrix):
+                var = example.T
+                output = self.forward(var)
+                # FIXME check the expected value type: should be a np.ndarray (check the case when we have single value)
+                bias_grads, weight_grads = self.back_propagation(output, expected_output[j])
+                self.update_biases(bias_grads, learning_rate)
+                self.update_weight(weight_grads, learning_rate)
+        toc = time.time()
+
+        print(f"Training finished! {toc - tic}")
+
+    @staticmethod
+    def __get_columns_between_a_and_b(matrix: np.ndarray, a: int, b: int):
+        return matrix[:, a:b]
+
+    @staticmethod
+    def __get_column(matrix: np.ndarray, index: int) -> np.ndarray:
+        return matrix[:, [index]]
 
     def forward(self, x_input: np.ndarray) -> np.ndarray:
         for layer in self.hidden_layers:
@@ -85,6 +111,16 @@ class NeuronalNetwork:
             bias.append(gradient)
             weight.append(np.dot(gradient, layer.last_input.T))
 
-            gradient = np.dot(layer.weight.T, gradient) 
+            gradient = np.dot(layer.weight.T, gradient)
 
         return bias, weight
+
+    def update_biases(self, bias_grads, learning_rate):
+        for layer in self.hidden_layers[::-1]:
+            layer.update_bias(learning_rate, bias_grads)
+        pass
+
+    def update_weight(self, weight_grads, learning_rate):
+        for layer in self.hidden_layers[::-1]:
+            layer.update_weight(learning_rate, weight_grads)
+        pass
