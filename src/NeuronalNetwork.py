@@ -75,8 +75,8 @@ class NeuronalNetwork:
                 output = self.forward(var)
                 # FIXME check the expected value type: should be a np.array (check the case when we have single value)
                 bias_grads, weight_grads = self.back_propagation(output, expected_output[j])
-                self.update_biases(bias_grads, learning_rate)
-                self.update_weight(weight_grads, learning_rate)
+                self.update_biases(bias_grads[j], learning_rate)
+                self.update_weight(weight_grads[j], learning_rate)
         toc = time.time()
 
         print(f"Training finished! {toc - tic}")

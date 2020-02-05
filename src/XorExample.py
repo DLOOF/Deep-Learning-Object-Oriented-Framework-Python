@@ -7,10 +7,10 @@ from src.NeuronalNetwork import NeuronalNetwork
 
 
 def get_data():
-    np.array([[0, 0, 0],
-              [0, 1, 1],
-              [1, 0, 1],
-              [1, 1, 0]])
+    return np.array([[0, 0, 0],
+                     [0, 1, 1],
+                     [1, 0, 1],
+                     [1, 1, 0]])
 
 
 if __name__ == '__main__':
