@@ -31,8 +31,8 @@ if __name__ == '__main__':
     iterations = 10000
     neuronal_net.train(get_data(), learning_rate, iterations)
 
-    print(neuronal_net.forward(np.array([0, 0]).reshape(2, 1)))
-    print(neuronal_net.forward(np.array([0, 1]).reshape(2, 1)))
-    print(neuronal_net.forward(np.array([1, 0]).reshape(2, 1)))
-    print(neuronal_net.forward(np.array([1, 1]).reshape(2, 1)))
+    print(f" [0, 0] = {neuronal_net.forward(np.array([0, 0]).reshape(2, 1))}")
+    print(f" [0, 1] = {neuronal_net.forward(np.array([0, 1]).reshape(2, 1))}")
+    print(f" [1, 0] = {neuronal_net.forward(np.array([1, 0]).reshape(2, 1))}")
+    print(f" [1, 1] = {neuronal_net.forward(np.array([1, 1]).reshape(2, 1))}")
 
