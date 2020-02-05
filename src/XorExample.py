@@ -7,10 +7,13 @@ from src.NeuronalNetwork import NeuronalNetwork
 
 
 def get_data():
-    return np.array([[0, 0, 0],
-                     [0, 1, 1],
-                     [1, 0, 1],
-                     [1, 1, 0]])
+    return np.array([
+        [1, 1, 0],
+        [0, 0, 0],
+        [0, 1, 1],
+        [1, 0, 1],
+    ]
+    )
 
 
 if __name__ == '__main__':
@@ -24,8 +27,9 @@ if __name__ == '__main__':
     output_neurons = 1
     neuronal_net = NeuronalNetwork(input_neurons, architecture, output_neurons, costFunction)
 
-    learning_rate = 0.01
-    iterations = 100
+    learning_rate = 0.003
+    iterations = 2000
     neuronal_net.train(get_data(), learning_rate, iterations)
-    res = neuronal_net.forward(np.array([0, 0]))
+
+    res = neuronal_net.forward(np.array([0, 0]).reshape(2, 1))
     print(res)

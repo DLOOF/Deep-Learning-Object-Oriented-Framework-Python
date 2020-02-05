@@ -6,9 +6,9 @@ from src.ActivationFunction import *
 
 
 class Layer:
-    num_neurons: int = None
     bias: np.array = None
     weight: np.array = None
+    num_neurons: int = None
     last_input: np.array = None
     last_output: np.array = None
     activationFunction: ActivationFunction = None
@@ -17,17 +17,19 @@ class Layer:
         self.num_neurons = num_neurons
         self.bias = np.random.rand(num_neurons, 1)
         self.activationFunction = activation_function
-        self.weight = np.random.rand(prev_num_neurons, num_neurons)
+        self.weight = np.random.rand(prev_num_neurons, num_neurons).T
 
     def forward(self, x_input: np.array) -> np.array:
         self.last_input = x_input
-        self.last_output = np.dot(self.weight.T, x_input) + self.bias
+        self.last_output = np.dot(self.weight, x_input) + self.bias
         return self.activationFunction.calculate(self.last_output)
 
     def update_weight(self, learning_rate: float, grads: np.array):
+        assert self.weight.shape == grads.shape
         self.weight = self.weight - grads * learning_rate
 
     def update_bias(self, learning_rate: float, grads: np.array):
+        assert self.bias.shape == grads.shape
         self.bias = self.bias - grads * learning_rate
 
 
@@ -71,7 +73,7 @@ class NeuronalNetwork:
 
         for i in range(iterations):
             for j, example in enumerate(training_matrix):
-                var = example.T
+                var = example.reshape(2, 1)
                 output = self.forward(var)
                 # FIXME check the expected value type: should be a np.array (check the case when we have single value)
                 bias_grads, weight_grads = self.back_propagation(output, expected_output[j])
