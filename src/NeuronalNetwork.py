@@ -17,7 +17,7 @@ class Layer:
         self.num_neurons = num_neurons
         self.bias = np.random.rand(num_neurons, 1)
         self.activationFunction = activation_function
-        self.weight = np.random.rand(prev_num_neurons, num_neurons).T
+        self.weight = np.random.rand(num_neurons, prev_num_neurons)
 
     def forward(self, x_input: np.array) -> np.array:
         self.last_input = x_input
@@ -69,7 +69,7 @@ class NeuronalNetwork:
         data_shape = data.shape
         matrix_depth = data_shape[1]
         expected_output = self.__get_column(data, matrix_depth - 1)
-        training_matrix = self.__get_columns_between_a_and_b(data, 0, matrix_depth - 1)
+        training_matrix = self.__get_columns_between_a_and_b(data, 0, matrix_depth -1)
 
         for i in range(iterations):
             for j, example in enumerate(training_matrix):
@@ -99,6 +99,7 @@ class NeuronalNetwork:
         return x_input
 
     def back_propagation(self, result, expected) -> Tuple[List[np.array], List[np.array]]:
+        assert result.shape == expected.shape, "result: %s \nexpected: %s" % (result.shape, expected.shape)
         bias = []
         weight = []
 
@@ -113,18 +114,20 @@ class NeuronalNetwork:
             gradient = np.multiply(gradient, layer.activationFunction.calculate_derivative(zz))
 
             bias.append(gradient)
+            assert gradient.shape[1] == layer.last_input.T.shape[0], "%s, %s" % (gradient.shape, layer.last_input.T.shape)
             weight.append(np.dot(gradient, layer.last_input.T))
 
+            assert layer.weight.T.shape[1] == gradient.shape[0], "%s, %s" % (layer.weight.T.shape, gradient.shape)
             gradient = np.dot(layer.weight.T, gradient)
 
-        return bias, weight
+        return bias[::-1], weight[::-1]
 
     def update_biases(self, bias_grads, learning_rate):
-        for i, layer in enumerate(self.hidden_layers[::-1]):
+        for i, layer in enumerate(self.hidden_layers):
             layer.update_bias(learning_rate, bias_grads[i])
         pass
 
     def update_weight(self, weight_grads, learning_rate):
-        for i, layer in enumerate(self.hidden_layers[::-1]):
+        for i, layer in enumerate(self.hidden_layers):
             layer.update_weight(learning_rate, weight_grads[i])
         pass
