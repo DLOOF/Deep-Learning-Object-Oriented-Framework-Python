@@ -75,6 +75,8 @@ class NeuronalNetwork:
             for j, example in enumerate(training_matrix):
                 var = example.reshape(2, 1)
                 output = self.forward(var)
+                if i % 100 == 0:
+                    print(self.cost_function.calculate(output.reshape(1, 1), expected_output[j].reshape(1, 1)) * 100)
                 # FIXME check the expected value type: should be a np.array (check the case when we have single value)
                 bias_grads, weight_grads = self.back_propagation(output, expected_output[j].reshape(1, 1))
                 self.update_biases(bias_grads, learning_rate)
@@ -105,9 +107,10 @@ class NeuronalNetwork:
         # FIXME check index out of the range
         for layer in self.hidden_layers[::-1]:
             z = layer.last_output
+            zz = layer.activationFunction.calculate(z)
 
             # element-wise multiplication
-            gradient = np.multiply(gradient, layer.activationFunction.calculate_derivative(z))
+            gradient = np.multiply(gradient, layer.activationFunction.calculate_derivative(zz))
 
             bias.append(gradient)
             weight.append(np.dot(gradient, layer.last_input.T))

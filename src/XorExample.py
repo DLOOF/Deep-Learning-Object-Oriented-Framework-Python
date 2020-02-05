@@ -1,8 +1,8 @@
 from src import *
 import numpy as np
 
-from src.ActivationFunction import Relu
-from src.CostFunction import MeanSquaredError
+from src.ActivationFunction import *
+from src.CostFunction import *
 from src.NeuronalNetwork import NeuronalNetwork
 
 
@@ -27,9 +27,12 @@ if __name__ == '__main__':
     output_neurons = 1
     neuronal_net = NeuronalNetwork(input_neurons, architecture, output_neurons, costFunction)
 
-    learning_rate = 0.003
-    iterations = 2000
+    learning_rate = 0.1
+    iterations = 10000
     neuronal_net.train(get_data(), learning_rate, iterations)
 
-    res = neuronal_net.forward(np.array([0, 0]).reshape(2, 1))
-    print(res)
+    print(neuronal_net.forward(np.array([0, 0]).reshape(2, 1)))
+    print(neuronal_net.forward(np.array([0, 1]).reshape(2, 1)))
+    print(neuronal_net.forward(np.array([1, 0]).reshape(2, 1)))
+    print(neuronal_net.forward(np.array([1, 1]).reshape(2, 1)))
+
