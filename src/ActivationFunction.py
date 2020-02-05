@@ -9,36 +9,36 @@ import numpy as np
 class ActivationFunction(ABC):
 
     @abstractmethod
-    def calculate(self, value: np.ndarray) -> np.ndarray:
+    def calculate(self, value: np.array) -> np.array:
         pass
 
     @abstractmethod
-    def calculate_derivative(self, value: np.ndarray) -> np.ndarray:
+    def calculate_derivative(self, value: np.array) -> np.array:
         pass
 
 
 class Relu(ActivationFunction):
 
-    def calculate_derivative(self, value: np.ndarray) -> np.ndarray:
+    def calculate_derivative(self, value: np.array) -> np.array:
         return np.vectorize(lambda x: 0 if x <= 0 else 1)(value)
 
-    def calculate(self, value: np.ndarray) -> np.ndarray:
+    def calculate(self, value: np.array) -> np.array:
         return np.vectorize(lambda x: max(0.0, x))(value)
 
 
 class Sigmoid(ActivationFunction):
 
-    def calculate_derivative(self, value: np.ndarray) -> np.ndarray:
+    def calculate_derivative(self, value: np.array) -> np.array:
         return self.calculate(value) * (1 - self.calculate(value))
 
-    def calculate(self, value: np.ndarray) -> np.ndarray:
+    def calculate(self, value: np.array) -> np.array:
         return 1 / (1 + np.exp(-value))
 
 
 class TanH(ActivationFunction):
 
-    def calculate_derivative(self, value: np.ndarray) -> np.ndarray:
+    def calculate_derivative(self, value: np.array) -> np.array:
         return 1 - np.tanh(value) ** 2
 
-    def calculate(self, value: np.ndarray) -> np.ndarray:
+    def calculate(self, value: np.array) -> np.array:
         return np.tanh(value)
