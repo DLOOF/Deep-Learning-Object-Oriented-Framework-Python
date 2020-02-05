@@ -76,7 +76,7 @@ class NeuronalNetwork:
                 var = example.reshape(2, 1)
                 output = self.forward(var)
                 # FIXME check the expected value type: should be a np.array (check the case when we have single value)
-                bias_grads, weight_grads = self.back_propagation(output, expected_output[j])
+                bias_grads, weight_grads = self.back_propagation(output, expected_output[j].reshape(1, 1))
                 self.update_biases(bias_grads, learning_rate)
                 self.update_weight(weight_grads, learning_rate)
         toc = time.time()
