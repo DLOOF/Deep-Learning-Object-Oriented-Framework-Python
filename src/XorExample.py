@@ -27,3 +27,5 @@ if __name__ == '__main__':
     learning_rate = 0.01
     iterations = 100
     neuronal_net.train(get_data(), learning_rate, iterations)
+    res = neuronal_net.forward(np.array([0, 0]))
+    print(res)

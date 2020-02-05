@@ -21,7 +21,7 @@ class Layer:
 
     def forward(self, x_input: np.array) -> np.array:
         self.last_input = x_input
-        self.last_output = self.weight.T * x_input + self.bias
+        self.last_output = np.dot(self.weight.T, x_input) + self.bias
         return self.activationFunction.calculate(self.last_output)
 
     def update_weight(self, learning_rate: float, grads: np.array):
