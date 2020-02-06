@@ -47,11 +47,10 @@ class NeuronalNetwork:
         self.cost_function = cost_function
 
         for layer in hidden_architecture:
-            self.__add_hidden_layer(layer[0], layer[1])
-        # FIXME
-        self.__add_hidden_layer(num_output, Sigmoid())
+            self.__add_layer(layer[0], layer[1])
+        self.__add_layer(num_output, Sigmoid())
 
-    def __add_hidden_layer(self, num_neurons: int, activation_function: ActivationFunction):
+    def __add_layer(self, num_neurons: int, activation_function: ActivationFunction):
         prev_num_neurons = self.__get_prev_num_neurons()
         new_layer = Layer(num_neurons, prev_num_neurons, activation_function)
         self.hidden_layers.append(new_layer)
@@ -63,35 +62,25 @@ class NeuronalNetwork:
         else:
             return self.hidden_layers[-1].num_neurons
 
-    def train(self, data: np.array, learning_rate: float = 0.001, iterations: int = 1000):
+    def train(self, input_data: np.array, expected_output: np.array, learning_rate: float = 0.001,
+              iterations: int = 1000):
         print("Starting training!")
         tic = time.time()
-        data_shape = data.shape
-        matrix_depth = data_shape[1]
-        expected_output = self.__get_column(data, matrix_depth - 1)
-        training_matrix = self.__get_columns_between_a_and_b(data, 0, matrix_depth - 1)
 
         for i in range(iterations):
-            for j, example in enumerate(training_matrix):
-                var = example.reshape(2, 1)
+            for j, example in enumerate(input_data):
+                # FIXME!
+                var = example.reshape(-1, 1)
                 output = self.forward(var)
                 if i % 100 == 0:
-                    print(self.cost_function.calculate(output.reshape(1, 1), expected_output[j].reshape(1, 1)) * 100)
+                    print(self.cost_function.calculate(output.reshape(-1, 1), expected_output[j].reshape(-1, 1)) * 100)
                 # FIXME check the expected value type: should be a np.array (check the case when we have single value)
-                bias_grads, weight_grads = self.back_propagation(output, expected_output[j].reshape(1, 1))
+                bias_grads, weight_grads = self.back_propagation(output, expected_output[j].reshape(-1, 1))
                 self.update_biases(bias_grads, learning_rate)
                 self.update_weight(weight_grads, learning_rate)
         toc = time.time()
 
         print(f"Training finished! {toc - tic}")
-
-    @staticmethod
-    def __get_columns_between_a_and_b(matrix: np.array, a: int, b: int):
-        return matrix[:, a:b]
-
-    @staticmethod
-    def __get_column(matrix: np.array, index: int) -> np.array:
-        return matrix[:, [index]]
 
     def forward(self, x_input: np.array) -> np.array:
         for layer in self.hidden_layers:
