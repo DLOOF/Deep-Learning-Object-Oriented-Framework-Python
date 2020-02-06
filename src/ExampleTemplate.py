@@ -3,8 +3,6 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-import time
-
 from src.NeuronalNetwork import NeuronalNetwork
 
 
