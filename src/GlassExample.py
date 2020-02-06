@@ -5,6 +5,11 @@ import numpy as np
 from src.ActivationFunction import Relu
 from src.CostFunction import MeanSquaredError
 from src.ExampleTemplate import ExampleTemplate
+from src.NeuronalNetwork import NeuronalNetwork
+
+
+def calculate_error(neural_net: NeuronalNetwork, out: np.array, expected: np.array):
+    return neural_net.cost_function.calculate(out.reshape(-1, 1), expected.reshape(-1, 1)) * 100
 
 
 class GlassExample(ExampleTemplate):
@@ -12,16 +17,15 @@ class GlassExample(ExampleTemplate):
         return np.genfromtxt("../datasets/glass.csv", delimiter=",", skip_header=1)
 
     def define_data(self):
-        self.training_data = self.get_data()[:, 0:-1]
-        self.expected_output = self.get_data()[:, -1]
+        self.input_data = self.get_data()[:, 0:-1]
+        self.output_data = self.get_data()[:, -1]
+        output = self.output_data.astype(int)
+        tmp = np.zeros((output.size, output.max()))
+        tmp[np.arange(output.size), output - 1] = 1
+        self.output_data = tmp
 
-        training_samples = int(self.get_data().shape[0] * .8)
-        self.training_data, self.expected_output = self.training_data[:training_samples, :], self.expected_output[:training_samples, :]
-
-        self.expected_output = self.expected_output.astype(int)
-        tmp = np.zeros((self.expected_output.size, self.expected_output.max()))
-        tmp[np.arange(self.expected_output.size), self.expected_output - 1] = 1
-        self.expected_output = tmp
+        self.training_samples = int(self.input_data.shape[0] * .8)
+        self.training_data, self.expected_output = self.input_data[:self.training_samples, :], self.output_data[:self.training_samples, :]
 
     def define_architecture(self):
         self.input_neurons = 9
@@ -36,13 +40,14 @@ class GlassExample(ExampleTemplate):
         self.architecture.append(layer_4)
         self.cost_function = MeanSquaredError()
 
-    def define_training_parameters(self):
+    def define_training_hyperparameters(self):
         self.learning_rate = 0.1
-        self.iterations = 10_0
+        self.iterations = 10_000
 
     def run_tests(self):
-        print(
-            f"[1.51711,14.23,0,2.08,73.36,0,8.62,1.67,0,7] = {self.neuronal_net.forward(np.array([1.51711, 14.23, 0, 2.08, 73.36, 0, 8.62, 1.67, 0]).reshape(-1, 1))}")
+        for sample_in, sample_out in zip(self.input_data[self.training_samples:, :], self.output_data[self.training_samples:, :]):
+            output = self.neural_net.forward(sample_in.reshape(-1, 1))
+            print(f"[{sample_in}] = {output.T} ({calculate_error(self.neural_net, output, sample_out).T})")
 
 
 if __name__ == '__main__':

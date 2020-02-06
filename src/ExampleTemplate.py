@@ -14,7 +14,7 @@ class ExampleTemplate(ABC):
     learning_rate = None
     cost_function = None
     raining_data = None
-    neuronal_net = None
+    neural_net = None
     iterations = None
     architecture = []
     experiment_name = None
@@ -23,19 +23,19 @@ class ExampleTemplate(ABC):
         self.experiment_name = experiment_name
 
     def build_neuronal_net(self):
-        self.neuronal_net = NeuronalNetwork(self.input_neurons, self.architecture, self.output_neurons,
-                                            self.cost_function)
+        self.neural_net = NeuronalNetwork(self.input_neurons, self.architecture, self.output_neurons,
+                                          self.cost_function)
 
     def train_and_save_nn(self):
-        self.neuronal_net.train(self.training_data, self.expected_output, self.learning_rate, self.iterations)
+        self.neural_net.train(self.training_data, self.expected_output, self.learning_rate, self.iterations)
         with open(f'{self.experiment_name}-{self.input_neurons}-{len(self.architecture)}-{self.output_neurons}.nn',
                   'wb') as file:
-            pickle.dump(self.neuronal_net, file)
+            pickle.dump(self.neural_net, file)
 
     def load_net_from_file(self):
         with open(f'{self.experiment_name}-{self.input_neurons}-{len(self.architecture)}-{self.output_neurons}.nn',
                   'rb') as file:
-            self.neuronal_net = pickle.load(file)
+            self.neural_net = pickle.load(file)
 
     @staticmethod
     def get_column(matrix: np.array, index: int) -> np.array:
@@ -58,7 +58,7 @@ class ExampleTemplate(ABC):
         pass
 
     @abstractmethod
-    def define_training_parameters(self):
+    def define_training_hyperparameters(self):
         pass
 
     @abstractmethod
@@ -69,7 +69,7 @@ class ExampleTemplate(ABC):
         # Config NN
         self.define_data()
         self.define_architecture()
-        self.define_training_parameters()
+        self.define_training_hyperparameters()
 
         # Build NN
         self.build_neuronal_net()

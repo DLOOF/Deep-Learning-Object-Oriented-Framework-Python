@@ -574,3 +574,9 @@ modules.xml
 # Sonarlint plugin
 
 # End of https://www.gitignore.io/api/intellij+all,pycharm+all
+
+*.nn
+datasets/glass.csv
+datasets/mushrooms.csv
+datasets/student-mat.csv
+datasets/train.csv

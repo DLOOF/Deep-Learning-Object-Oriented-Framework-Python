@@ -72,12 +72,14 @@ class NeuronalNetwork:
                 # FIXME!
                 var = example.reshape(-1, 1)
                 output = self.forward(var)
-                if i % 100 == 0:
-                    print(self.cost_function.calculate(output.reshape(-1, 1), expected_output[j].reshape(-1, 1)) * 100)
                 # FIXME check the expected value type: should be a np.array (check the case when we have single value)
                 bias_grads, weight_grads = self.back_propagation(output, expected_output[j].reshape(-1, 1))
                 self.update_biases(bias_grads, learning_rate)
                 self.update_weight(weight_grads, learning_rate)
+
+            if i % 100 == 0:
+                output = self.forward(var)
+                print(i, self.cost_function.calculate(output.reshape(-1, 1), expected_output[j].reshape(-1, 1)) * 100)
         toc = time.time()
 
         print(f"Training finished! {toc - tic}")
