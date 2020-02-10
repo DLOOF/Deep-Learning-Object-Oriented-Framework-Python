@@ -37,7 +37,7 @@ class GlassExample(ExampleTemplate):
         self.architecture.append(layer_1)
         self.architecture.append(layer_2)
         self.architecture.append(layer_3)
-        self.architecture.append(layer_4)
+        # self.architecture.append(layer_4)
         self.cost_function = MeanSquaredError()
 
     def define_training_hyperparameters(self):

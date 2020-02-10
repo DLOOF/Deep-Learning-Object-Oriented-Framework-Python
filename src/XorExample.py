@@ -23,14 +23,14 @@ class XorExample(ExampleTemplate):
         self.output_neurons = 1
 
         layer_1 = (2, Relu())
-        layer_2 = (2, Relu())
-        layer_3 = (2, Relu())
-        layer_4 = (2, Relu())
+        layer_2 = (4, Relu())
+        layer_3 = (4, Relu())
+        layer_4 = (4, Relu())
 
         self.architecture.append(layer_1)
-        self.architecture.append(layer_2)
-        self.architecture.append(layer_3)
-        self.architecture.append(layer_4)
+        # self.architecture.append(layer_2)
+        # self.architecture.append(layer_3)
+        # self.architecture.append(layer_4)
 
         self.cost_function = MeanSquaredError()
 

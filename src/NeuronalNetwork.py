@@ -3,6 +3,7 @@ from typing import List, Tuple
 
 from src import CostFunction
 from src.ActivationFunction import *
+import matplotlib.pyplot as plt
 
 
 class Layer:
@@ -66,6 +67,8 @@ class NeuronalNetwork:
               iterations: int = 1000):
         print("Starting training!")
         tic = time.time()
+        iteration_outputs = []
+        stept = []
 
         for i in range(iterations):
             for j, example in enumerate(input_data):
@@ -77,10 +80,21 @@ class NeuronalNetwork:
                 self.update_biases(bias_grads, learning_rate)
                 self.update_weight(weight_grads, learning_rate)
 
-            if i % 100 == 0:
+            if i % 100 == 0 and i != 0:
                 output = self.forward(var)
-                print(i, self.cost_function.calculate(output.reshape(-1, 1), expected_output[j].reshape(-1, 1)) * 100)
+                error = self.cost_function.calculate(output.reshape(-1, 1), expected_output[j].reshape(-1, 1))
+                iteration_outputs.append(np.max(error))
+                stept.append(i)
+
+                print(i, np.max(error) * 100)
+
         toc = time.time()
+        fig, ax = plt.subplots()
+        ax.plot(stept, iteration_outputs)
+        ax.set_xlabel('iterations')
+        ax.set_ylabel('error')
+        ax.set_title('Xor')
+        plt.show()
 
         print(f"Training finished! {toc - tic}")
 
