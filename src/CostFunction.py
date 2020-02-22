@@ -9,7 +9,7 @@ import numpy as np
 class CostFunction(ABC):
 
     @abstractmethod
-    def calculate(self, value: np.array, expected_value: np.array) -> np.array:
+    def calculate(self, value: np.array, expected_value: np.array) -> float:
         pass
 
     @abstractmethod
@@ -19,8 +19,8 @@ class CostFunction(ABC):
 
 class MeanAbsoluteError(CostFunction):
 
-    def calculate(self, value: np.array, expected_value: np.array) -> np.array:
-        return np.abs(value - expected_value)
+    def calculate(self, value: np.array, expected_value: np.array) -> float:
+        return float(np.sum(np.absolute(value - expected_value)).astype("float"))
 
     def calculate_derivative(self, value: np.array, expected_value: np.array) -> np.array:
         return np.vectorize(lambda x: -1 if x > 0 else 1)(value - expected_value)
@@ -28,8 +28,12 @@ class MeanAbsoluteError(CostFunction):
 
 class MeanSquaredError(CostFunction):
 
-    def calculate(self, value: np.array, expected_value: np.array) -> np.array:
-        return np.power(value - expected_value, 2) / 2
+    def calculate(self, value: np.array, expected_value: np.array) -> float:
+        sqr = value - expected_value
+        sqr = np.dot(sqr.T, sqr)
+        sqr /= 2
+        sqr = float(sqr.astype("float"))
+        return sqr
 
     def calculate_derivative(self, value: np.array, expected_value: np.array) -> np.array:
         return value - expected_value
@@ -37,7 +41,11 @@ class MeanSquaredError(CostFunction):
 
 class CrossEntropy(CostFunction):
 
-    def calculate(self, value: np.array, expected_value: np.array) -> np.array:
+    def calculate(self, value: np.array, expected_value: np.array) -> float:
+        # FIXME needs to be fixed this method has to return a scalar rather than a vector
+        # FIXME it depends whether if it is calculating for multiple classes instead of binary classes
+        assert value.ndim == expected_value.ndim and expected_value.ndim == 1
+        raise NotImplementedError("This method needs to be fixed")
         return - (expected_value * np.log(value) + (1 - expected_value) * np.log(1 - value))
 
     def calculate_derivative(self, value: np.array, expected_value: np.array) -> np.array:
