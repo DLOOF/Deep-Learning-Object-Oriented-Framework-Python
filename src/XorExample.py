@@ -1,5 +1,5 @@
-from src.ActivationFunction import *
-from src.CostFunction import *
+from src.ActivationFunctions.ActivationFunction import *
+from src.CostFunctions.CostFunction import *
 from src.ExampleTemplate import ExampleTemplate
 
 
@@ -46,5 +46,6 @@ class XorExample(ExampleTemplate):
 
 
 if __name__ == '__main__':
+    np.random.seed(0)
     xor_example = XorExample("xor_example")
     xor_example.run()

@@ -1,8 +1,8 @@
 import time
 from typing import List, Tuple
 
-from src import CostFunction
-from src.ActivationFunction import *
+from src.CostFunctions import CostFunction
+from src.ActivationFunctions.ActivationFunction import *
 import matplotlib.pyplot as plt
 
 
@@ -49,6 +49,7 @@ class NeuronalNetwork:
 
         for layer in hidden_architecture:
             self.__add_layer(layer[0], layer[1])
+        # TODO should be able to specify the output activation function e.g. Softmax
         self.__add_layer(num_output, Sigmoid())
 
     def __add_layer(self, num_neurons: int, activation_function: ActivationFunction):

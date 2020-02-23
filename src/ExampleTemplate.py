@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-from src.NeuronalNetwork import NeuronalNetwork
+from src.Networks.NeuronalNetwork import NeuronalNetwork
 
 
 class ExampleTemplate(ABC):

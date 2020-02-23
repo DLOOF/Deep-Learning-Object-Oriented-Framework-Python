@@ -1,11 +1,9 @@
-import pickle
-from abc import ABC, abstractmethod
 import numpy as np
 
-from src.ActivationFunction import Relu
-from src.CostFunction import MeanSquaredError
+from src.ActivationFunctions.ActivationFunction import Relu
+from src.CostFunctions.CostFunction import MeanSquaredError
 from src.ExampleTemplate import ExampleTemplate
-from src.NeuronalNetwork import NeuronalNetwork
+from src.Networks.NeuronalNetwork import NeuronalNetwork
 
 
 def calculate_error(neural_net: NeuronalNetwork, out: np.array, expected: np.array):
