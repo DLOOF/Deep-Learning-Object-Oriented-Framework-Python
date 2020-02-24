@@ -47,35 +47,35 @@ class RelationExample(ExampleTemplate):
 
     def run_tests(self):
         print(
-            f" [1, 1, 0, 0, 0, 0] ans = [0, 1] = {self.neural_net.forward(np.array([1, 1, 0, 0, 0, 0]).reshape(-1, 1)).T}")
+            f" [1, 1, 0, 0, 0, 0] ans = [0, 1] = {self.neural_net.predict(np.array([1, 1, 0, 0, 0, 0]).reshape(-1, 1)).T}")
         print(
-            f" [1, 0, 1, 0, 0, 0] ans = [0, 1] = {self.neural_net.forward(np.array([1, 0, 1, 0, 0, 0]).reshape(-1, 1)).T}")
+            f" [1, 0, 1, 0, 0, 0] ans = [0, 1] = {self.neural_net.predict(np.array([1, 0, 1, 0, 0, 0]).reshape(-1, 1)).T}")
         print(
-            f" [1, 0, 0, 1, 0, 0] ans = [1, 0] = {self.neural_net.forward(np.array([1, 0, 0, 1, 0, 0]).reshape(-1, 1)).T}")
+            f" [1, 0, 0, 1, 0, 0] ans = [1, 0] = {self.neural_net.predict(np.array([1, 0, 0, 1, 0, 0]).reshape(-1, 1)).T}")
         print(
-            f" [1, 0, 0, 0, 1, 0] ans = [1, 0] = {self.neural_net.forward(np.array([1, 0, 0, 0, 1, 0]).reshape(-1, 1)).T}")
+            f" [1, 0, 0, 0, 1, 0] ans = [1, 0] = {self.neural_net.predict(np.array([1, 0, 0, 0, 1, 0]).reshape(-1, 1)).T}")
         print(
-            f" [1, 0, 0, 0, 0, 1] ans = [1, 0] = {self.neural_net.forward(np.array([1, 0, 0, 0, 0, 1]).reshape(-1, 1)).T}")
+            f" [1, 0, 0, 0, 0, 1] ans = [1, 0] = {self.neural_net.predict(np.array([1, 0, 0, 0, 0, 1]).reshape(-1, 1)).T}")
         print(
-            f" [0, 1, 1, 0, 0, 0] ans = [0, 1] = {self.neural_net.forward(np.array([0, 1, 1, 0, 0, 0]).reshape(-1, 1)).T}")
+            f" [0, 1, 1, 0, 0, 0] ans = [0, 1] = {self.neural_net.predict(np.array([0, 1, 1, 0, 0, 0]).reshape(-1, 1)).T}")
         print(
-            f" [0, 1, 0, 1, 0, 0] ans = [1, 0] = {self.neural_net.forward(np.array([0, 1, 0, 1, 0, 0]).reshape(-1, 1)).T}")
+            f" [0, 1, 0, 1, 0, 0] ans = [1, 0] = {self.neural_net.predict(np.array([0, 1, 0, 1, 0, 0]).reshape(-1, 1)).T}")
         print(
-            f" [0, 1, 0, 0, 1, 0] ans = [1, 0] = {self.neural_net.forward(np.array([0, 1, 0, 0, 1, 0]).reshape(-1, 1)).T}")
+            f" [0, 1, 0, 0, 1, 0] ans = [1, 0] = {self.neural_net.predict(np.array([0, 1, 0, 0, 1, 0]).reshape(-1, 1)).T}")
         print(
-            f" [0, 1, 0, 0, 0, 1] ans = [1, 0] = {self.neural_net.forward(np.array([0, 1, 0, 0, 0, 1]).reshape(-1, 1)).T}")
+            f" [0, 1, 0, 0, 0, 1] ans = [1, 0] = {self.neural_net.predict(np.array([0, 1, 0, 0, 0, 1]).reshape(-1, 1)).T}")
         print(
-            f" [0, 0, 1, 1, 0, 0] ans = [1, 0] = {self.neural_net.forward(np.array([0, 0, 1, 1, 0, 0]).reshape(-1, 1)).T}")
+            f" [0, 0, 1, 1, 0, 0] ans = [1, 0] = {self.neural_net.predict(np.array([0, 0, 1, 1, 0, 0]).reshape(-1, 1)).T}")
         print(
-            f" [0, 0, 1, 0, 1, 0] ans = [1, 0] = {self.neural_net.forward(np.array([0, 0, 1, 0, 1, 0]).reshape(-1, 1)).T}")
+            f" [0, 0, 1, 0, 1, 0] ans = [1, 0] = {self.neural_net.predict(np.array([0, 0, 1, 0, 1, 0]).reshape(-1, 1)).T}")
         print(
-            f" [0, 0, 1, 0, 0, 1] ans = [1, 0] = {self.neural_net.forward(np.array([0, 0, 1, 0, 0, 1]).reshape(-1, 1)).T}")
+            f" [0, 0, 1, 0, 0, 1] ans = [1, 0] = {self.neural_net.predict(np.array([0, 0, 1, 0, 0, 1]).reshape(-1, 1)).T}")
         print(
-            f" [0, 0, 0, 1, 1, 0] ans = [0, 1] = {self.neural_net.forward(np.array([0, 0, 0, 1, 1, 0]).reshape(-1, 1)).T}")
+            f" [0, 0, 0, 1, 1, 0] ans = [0, 1] = {self.neural_net.predict(np.array([0, 0, 0, 1, 1, 0]).reshape(-1, 1)).T}")
         print(
-            f" [0, 0, 0, 1, 0, 1] ans = [0, 1] = {self.neural_net.forward(np.array([0, 0, 0, 1, 0, 1]).reshape(-1, 1)).T}")
+            f" [0, 0, 0, 1, 0, 1] ans = [0, 1] = {self.neural_net.predict(np.array([0, 0, 0, 1, 0, 1]).reshape(-1, 1)).T}")
         print(
-            f" [0, 0, 0, 0, 1, 1] ans = [0, 1] = {self.neural_net.forward(np.array([0, 0, 0, 0, 1, 1]).reshape(-1, 1)).T}")
+            f" [0, 0, 0, 0, 1, 1] ans = [0, 1] = {self.neural_net.predict(np.array([0, 0, 0, 0, 1, 1]).reshape(-1, 1)).T}")
 
 
 if __name__ == '__main__':

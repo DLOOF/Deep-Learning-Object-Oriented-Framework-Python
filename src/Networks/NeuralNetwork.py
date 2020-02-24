@@ -5,6 +5,9 @@ from src.CostFunctions import CostFunction
 from src.ActivationFunctions.ActivationFunction import *
 import matplotlib.pyplot as plt
 
+from src.Networks.SupervisedModel import SupervisedModel
+from src.Regularizations.EarlyStoppingRegularization import StoppingCondition, VoidStoppingCondition
+
 
 class Layer:
     bias: np.array = None
@@ -34,18 +37,18 @@ class Layer:
         self.bias = self.bias - grads * learning_rate
 
 
-class NeuronalNetwork:
-    num_inputs: int = None
-    num_output: int = None
-    hidden_layers: List[Layer] = None
-    cost_function: CostFunction = None
+class NeuralNetwork(SupervisedModel):
 
     def __init__(self, num_inputs: int, hidden_architecture: List[Tuple[int, ActivationFunction]],
-                 num_output: int, cost_function: CostFunction):
+                 num_output: int, cost_function: CostFunction, learning_rate: float = 0.001,
+                 iterations: int = 1000, stopping_condition: StoppingCondition = VoidStoppingCondition()):
         self.hidden_layers = []
         self.num_output = num_output
         self.num_inputs = num_inputs
         self.cost_function = cost_function
+        self.learning_rate = learning_rate
+        self.iterations = iterations
+        self.stopping_condition = stopping_condition
 
         for layer in hidden_architecture:
             self.__add_layer(layer[0], layer[1])
@@ -64,30 +67,34 @@ class NeuronalNetwork:
         else:
             return self.hidden_layers[-1].num_neurons
 
-    def train(self, input_data: np.array, expected_output: np.array, learning_rate: float = 0.001,
-              iterations: int = 1000):
+    def train(self, input_data: np.array, expected_output: np.array):
         print("Starting training!")
         tic = time.time()
         iteration_outputs = []
         stept = []
 
-        for i in range(iterations):
+        for i in range(self.iterations):
+            # FIXME: should add the validation set to the stopping condition
+            if self.stopping_condition.should_stop(self, input_data, expected_output):
+                print("Stopping model training early")
+                break
+
             for j, example in enumerate(input_data):
                 # FIXME!
                 var = example.reshape(-1, 1)
-                output = self.forward(var)
+                output = self.predict(var)
                 # FIXME check the expected value type: should be a np.array (check the case when we have single value)
                 bias_grads, weight_grads = self.back_propagation(output, expected_output[j].reshape(-1, 1))
-                self.update_biases(bias_grads, learning_rate)
-                self.update_weight(weight_grads, learning_rate)
+                self.update_biases(bias_grads, self.learning_rate)
+                self.update_weight(weight_grads, self.learning_rate)
 
             if i % 100 == 0 and i != 0:
-                output = self.forward(var)
+                output = self.predict(var)
                 error = self.cost_function.calculate(output.reshape(-1, 1), expected_output[j].reshape(-1, 1))
                 iteration_outputs.append(np.max(error))
                 stept.append(i)
 
-                print(i, np.max(error) * 100)
+                print(i, error * 100)
 
         toc = time.time()
         fig, ax = plt.subplots()
@@ -99,7 +106,7 @@ class NeuronalNetwork:
 
         print(f"Training finished! {toc - tic}")
 
-    def forward(self, x_input: np.array) -> np.array:
+    def predict(self, x_input: np.array) -> np.array:
         for layer in self.hidden_layers:
             x_input = layer.forward(x_input)
         return x_input

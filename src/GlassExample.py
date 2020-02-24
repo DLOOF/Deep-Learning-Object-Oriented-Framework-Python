@@ -3,10 +3,10 @@ import numpy as np
 from src.ActivationFunctions.ActivationFunction import Relu
 from src.CostFunctions.CostFunction import MeanSquaredError
 from src.ExampleTemplate import ExampleTemplate
-from src.Networks.NeuronalNetwork import NeuronalNetwork
+from src.Networks.NeuralNetwork import NeuralNetwork
 
 
-def calculate_error(neural_net: NeuronalNetwork, out: np.array, expected: np.array):
+def calculate_error(neural_net: NeuralNetwork, out: np.array, expected: np.array):
     return neural_net.cost_function.calculate(out.reshape(-1, 1), expected.reshape(-1, 1)) * 100
 
 
@@ -44,7 +44,7 @@ class GlassExample(ExampleTemplate):
 
     def run_tests(self):
         for sample_in, sample_out in zip(self.input_data[self.training_samples:, :], self.output_data[self.training_samples:, :]):
-            output = self.neural_net.forward(sample_in.reshape(-1, 1))
+            output = self.neural_net.predict(sample_in.reshape(-1, 1))
             print(f"[{sample_in}] = {output.T} ({calculate_error(self.neural_net, output, sample_out).T})")
 
 

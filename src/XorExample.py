@@ -39,10 +39,10 @@ class XorExample(ExampleTemplate):
         self.iterations = 10_000
 
     def run_tests(self):
-        print(f" [0, 0] = {self.neural_net.forward(np.array([0, 0]).reshape(-1, 1))}")
-        print(f" [0, 1] = {self.neural_net.forward(np.array([0, 1]).reshape(-1, 1))}")
-        print(f" [1, 0] = {self.neural_net.forward(np.array([1, 0]).reshape(-1, 1))}")
-        print(f" [1, 1] = {self.neural_net.forward(np.array([1, 1]).reshape(-1, 1))}")
+        print(f" [0, 0] = {self.neural_net.predict(np.array([0, 0]).reshape(-1, 1))}")
+        print(f" [0, 1] = {self.neural_net.predict(np.array([0, 1]).reshape(-1, 1))}")
+        print(f" [1, 0] = {self.neural_net.predict(np.array([1, 0]).reshape(-1, 1))}")
+        print(f" [1, 1] = {self.neural_net.predict(np.array([1, 1]).reshape(-1, 1))}")
 
 
 if __name__ == '__main__':

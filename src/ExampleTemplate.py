@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-from src.Networks.NeuronalNetwork import NeuronalNetwork
+from src.Networks.NeuralNetwork import NeuralNetwork
 
 
 class ExampleTemplate(ABC):
@@ -13,7 +13,6 @@ class ExampleTemplate(ABC):
     training_data = None
     learning_rate = None
     cost_function = None
-    raining_data = None
     neural_net = None
     iterations = None
     architecture = []
@@ -23,11 +22,11 @@ class ExampleTemplate(ABC):
         self.experiment_name = experiment_name
 
     def build_neuronal_net(self):
-        self.neural_net = NeuronalNetwork(self.input_neurons, self.architecture, self.output_neurons,
-                                          self.cost_function)
+        self.neural_net = NeuralNetwork(self.input_neurons, self.architecture, self.output_neurons,
+                                        self.cost_function, self.learning_rate, self.iterations)
 
     def train_and_save_nn(self):
-        self.neural_net.train(self.training_data, self.expected_output, self.learning_rate, self.iterations)
+        self.neural_net.train(self.training_data, self.expected_output)
         with open(f'{self.experiment_name}-{self.input_neurons}-{len(self.architecture)}-{self.output_neurons}.nn',
                   'wb') as file:
             pickle.dump(self.neural_net, file)

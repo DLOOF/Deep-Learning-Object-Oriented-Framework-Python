@@ -3,7 +3,7 @@ import numpy as np
 from src.ActivationFunctions.ActivationFunction import ActivationFunction
 
 
-class RegularizationActivationFunction(ActivationFunction):
+class ActivationFunctionRegularization(ActivationFunction):
 
     def __init__(self, activation_function: ActivationFunction):
         assert activation_function is not None
@@ -26,7 +26,7 @@ class RegularizationActivationFunction(ActivationFunction):
         return self.regularize(value)
 
 
-class Dropout(RegularizationActivationFunction):
+class Dropout(ActivationFunctionRegularization):
 
     """
     Dropout (Hinton et. al. 2012) regularization technique
