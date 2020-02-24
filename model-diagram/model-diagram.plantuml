@@ -1,0 +1,88 @@
+@startuml
+!pragma teoz true
+skinparam shadowing false
+' skinparam monochrome true
+' hide footbox
+hide empty members
+
+abstract class SupervisedModel {
+      {abstract} + train(input: Vector, expectedOutput: Vector): void
+      {abstract} + predict(input: Vector): Vector
+}
+
+class NeuralNetwork {
+      - num_inputs: int
+      - num_ouputs: int
+      - learning_rate: float
+      - iterations: int
+
+      + backprop(output, expected): Tuple[List[Matrix],List[Vector]]
+}
+
+SupervisedModel <|-- NeuralNetwork
+
+class Layer {
+      - bias: Vector
+      - weights: Matrix
+      - units: int
+
+      + forward(input: Vector): Vector
+}
+
+abstract class CostFunction {
+      {abstract} + calculate(...): float
+      {abstract} + calculateGradient(...): Vector
+}
+
+abstract class ActivationFunction {
+      {abstract} + calculate(...): Vector
+      {abstract} + calculateGradient(...): Vector
+}
+
+NeuralNetwork -- "1" CostFunction
+NeuralNetwork --> "1..*" Layer : hiddenLayers >
+' NeuralNetwork --> "1" Layer : outputLayer >
+
+Layer --> "1" ActivationFunction : activationFunction >
+
+
+
+CostFunction <|-- MeanAbsoluteError
+CostFunction <|-- MeanSquaredError
+CostFunction <|-- CrossEntropy
+
+ActivationFunction <|-- ReLU
+ActivationFunction <|-- Sigmoid
+ActivationFunction <|-- TanH
+ActivationFunction <|-- Softmax
+
+
+abstract class ActivationFunctionRegularizaton {
+	 {abstract} + regularize(value: Vector): Vector
+	 {abstract} + regularizationGradient(value: Vector): Vector
+}
+
+class Dropout
+
+ActivationFunction <|-- ActivationFunctionRegularizaton
+ActivationFunctionRegularizaton <|-- Dropout
+
+class BaggingRegularization {
+      + _(models: List[SupervizedModels])
+}
+
+SupervisedModel <|-- BaggingRegularization
+
+abstract class NormPenaltyRegularization {
+	 {abstract} + calculate(value: Vector): float
+	 {abstract} + calculateGradient(value: Vector): Vector
+}
+
+class L1WeightDecay
+class L2WeightDecay
+
+NormPenaltyRegularization <|-- L1WeightDecay
+NormPenaltyRegularization <|-- L2WeightDecay
+CostFunction --> "0..1" NormPenaltyRegularization : regularizationFunction >
+
+@enduml

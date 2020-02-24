@@ -13,7 +13,7 @@ class RegularizationFunction(ABC):
         pass
 
 
-class WeightDecay(RegularizationFunction):
+class L2WeightDecay(RegularizationFunction):
     def calculate_derivative(self, value: np.array) -> np.array:
         return value
 

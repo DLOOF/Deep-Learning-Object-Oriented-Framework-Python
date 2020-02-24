@@ -1,0 +1,78 @@
+@startuml
+!pragma teoz true
+skinparam shadowing false
+' skinparam monochrome true
+hide footbox
+
+!define _queue Q
+!define _sgxt \mathcal{SGX}_t
+!define _sgxmn \mathcal{SGX}_{\min}
+!define _sgxmx \mathcal{SGX}_{\max}
+!define _sgxtable \mathcal{SGX}_{\text{T}}
+!define _ti \mathcal{T}_{i}
+!define _at \mathbf{\mathcal{A}}_{t}
+!define _qt \mathcal{Q}_{t}
+!define _nodesqt \mathbf{\mathcal{Q}}_{\text{T}}
+!define _st \mathcal{ST}
+!define _pk \mathcal{P}_k
+!define _node \mathcal{N}
+!define _server \mathcal{S}
+!define _node_enclave \mathcal{E}
+!define _npk \mathcal{N}_{_pk}
+!define _nid \mathcal{N}_{id}
+!define _tr \mathcal{T}_r
+!define _rt \mathcal{RT}
+
+participant "PoET++ Server\n<math>_server</math>" as server
+participant "PoET++ Node\n<math>_node</math>" as node
+participant "Node enclave\n<math>_node_enclave</math>" as node_enclave
+
+autonumber
+' activate server
+activate node
+server <- node ++ : <math>Register(_npk, Sign(_npk))</math>
+server <- server : Verification of  <math>_npk</math>
+
+alt ACK
+    server --> node : Respond with <math>_nid</math>, <math>_sgxmn</math>, <math>_sgxmx</math> and <math>_tr</math>
+else else
+    autonumber 3
+    server --> node !! : Terminate connection
+    deactivate server
+    ||10||
+end
+
+|||
+activate node_enclave
+ref over server, node, node_enclave : <b>Remote attestation</b>\n
+
+autonumber resume
+node -> node_enclave !! : Generate <math>_sgxt \in [_sgxmn, _sgxmx]</math>\nand destroy enclave
+
+server <- node : Send <math>_sgxt</math>
+hnote left : Arrival Time
+
+server <- server : Verification of <math>_sgxt</math>
+
+autonumber stop
+opt Verification not successful
+    server --> node !! : Terminate connection
+    ' destroy node
+end
+autonumber resume
+
+server <- server : Insert <math>_nid</math> to <math>_sgxtable</math> and <math>_queue</math>
+
+server --> node : Send updated <math>_sgxtable</math> and <math>_queue</math>
+node -> node : Determine <math>_ti</math>, <math>_qt</math> and <math>_st</math>
+
+loop <math>_rt\ne0</math>
+     autonumber 10.1 "<b>00.0</b>"
+     server <- node : Ask for updated <math>_sgxtable</math>
+     node <- node : Determine <math>_st</math>
+else else
+    autonumber 11
+    server <- node : Notify the leadership
+end
+
+@enduml
