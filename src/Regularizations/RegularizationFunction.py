@@ -9,12 +9,12 @@ class RegularizationFunction(ABC):
         pass
 
     @abstractmethod
-    def calculate_derivative(self, value: np.array) -> np.array:
+    def calculate_gradient(self, value: np.array) -> np.array:
         pass
 
 
 class L2WeightDecay(RegularizationFunction):
-    def calculate_derivative(self, value: np.array) -> np.array:
+    def calculate_gradient(self, value: np.array) -> np.array:
         return value
 
     def calculate(self, value: np.array) -> float:

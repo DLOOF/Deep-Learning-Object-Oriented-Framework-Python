@@ -19,7 +19,7 @@ class ActivationFunctionRegularization(ActivationFunction):
     def regularization_gradient(self, value: np.array) -> np.array:
         pass
 
-    def calculate_derivative(self, value: np.array) -> np.array:
+    def calculate_gradient(self, value: np.array) -> np.array:
         return self.regularization_gradient(value)
 
     def calculate(self, value: np.array) -> np.array:
@@ -49,4 +49,4 @@ class Dropout(ActivationFunctionRegularization):
 
     def regularization_gradient(self, value: np.array) -> np.array:
         assert value.ndim == 1, "must be a unidimensional vector: %d dimensions" % value.ndim
-        return np.multiply(self.previous_mask, self.activation_function.calculate_derivative(value))
+        return np.multiply(self.previous_mask, self.activation_function.calculate_gradient(value))

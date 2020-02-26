@@ -30,8 +30,8 @@ class Layer {
 }
 
 abstract class CostFunction {
-      {abstract} + calculate(...): float
-      {abstract} + calculateGradient(...): Vector
+      {abstract} + calculate(value, expected_value): float
+      {abstract} + calculateGradient(value, expected_value): Vector
 }
 
 abstract class ActivationFunction {
@@ -39,8 +39,8 @@ abstract class ActivationFunction {
       {abstract} + calculateGradient(...): Vector
 }
 
-NeuralNetwork -- "1" CostFunction
-NeuralNetwork --> "1..*" Layer : hiddenLayers >
+NeuralNetwork -- "1" CostFunction : costFunction >
+NeuralNetwork --> "*" Layer : hiddenLayers >
 ' NeuralNetwork --> "1" Layer : outputLayer >
 
 Layer --> "1" ActivationFunction : activationFunction >
@@ -58,6 +58,7 @@ ActivationFunction <|-- Softmax
 
 
 abstract class ActivationFunctionRegularizaton {
+	 + _(activationFunction: ActivationFunction)
 	 {abstract} + regularize(value: Vector): Vector
 	 {abstract} + regularizationGradient(value: Vector): Vector
 }
@@ -72,6 +73,7 @@ class BaggingRegularization {
 }
 
 SupervisedModel <|-- BaggingRegularization
+BaggingRegularization --> "1..*" SupervisedModel : models >
 
 abstract class NormPenaltyRegularization {
 	 {abstract} + calculate(value: Vector): float

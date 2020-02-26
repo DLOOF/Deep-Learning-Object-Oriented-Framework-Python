@@ -13,13 +13,13 @@ class ActivationFunction(ABC):
         pass
 
     @abstractmethod
-    def calculate_derivative(self, value: np.array) -> np.array:
+    def calculate_gradient(self, value: np.array) -> np.array:
         pass
 
 
 class Relu(ActivationFunction):
 
-    def calculate_derivative(self, value: np.array) -> np.array:
+    def calculate_gradient(self, value: np.array) -> np.array:
         return np.vectorize(lambda x: 0 if x <= 0 else 1)(value)
 
     def calculate(self, value: np.array) -> np.array:
@@ -28,7 +28,7 @@ class Relu(ActivationFunction):
 
 class Sigmoid(ActivationFunction):
 
-    def calculate_derivative(self, value: np.array) -> np.array:
+    def calculate_gradient(self, value: np.array) -> np.array:
         return self.calculate(value) * (1 - self.calculate(value))
 
     def calculate(self, value: np.array) -> np.array:
@@ -37,7 +37,7 @@ class Sigmoid(ActivationFunction):
 
 class TanH(ActivationFunction):
 
-    def calculate_derivative(self, value: np.array) -> np.array:
+    def calculate_gradient(self, value: np.array) -> np.array:
         return 1 - np.tanh(value) ** 2
 
     def calculate(self, value: np.array) -> np.array:

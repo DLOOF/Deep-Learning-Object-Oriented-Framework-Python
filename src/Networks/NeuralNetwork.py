@@ -115,7 +115,7 @@ class NeuralNetwork(SupervisedModel):
         bias = []
         weight = []
 
-        gradient = self.cost_function.calculate_derivative(result, expected)
+        gradient = self.cost_function.calculate_gradient(result, expected)
 
         # FIXME check index out of the range
         for layer in self.hidden_layers[::-1]:
@@ -123,7 +123,7 @@ class NeuralNetwork(SupervisedModel):
             zz = layer.activationFunction.calculate(z)
 
             # element-wise multiplication
-            gradient = np.multiply(gradient, layer.activationFunction.calculate_derivative(zz))
+            gradient = np.multiply(gradient, layer.activationFunction.calculate_gradient(zz))
 
             bias.append(gradient)
             weight.append(np.dot(gradient, layer.last_input.T))
