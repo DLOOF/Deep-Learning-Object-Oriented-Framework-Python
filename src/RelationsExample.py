@@ -25,8 +25,8 @@ class RelationExample(ExampleTemplate):
         )
 
     def define_data(self):
-        self.training_data = self.get_columns_between_a_and_b(self.get_data(), 0, 5)
-        self.expected_output = self.get_columns_between_a_and_b(self.get_data(), 6, 7)
+        self.training_data = self.get_columns_between_a_and_b(self.get_data(), 0, 5).T
+        self.expected_output = self.get_columns_between_a_and_b(self.get_data(), 6, 7).T
 
     def define_architecture(self):
         self.architecture = []

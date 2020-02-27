@@ -19,13 +19,16 @@ class Layer:
 
     def __init__(self, num_neurons: int, prev_num_neurons: int, activation_function: ActivationFunction = Relu()):
         self.num_neurons = num_neurons
-        self.bias = np.random.rand(num_neurons, 1)
+        self.bias = None
         self.activationFunction = activation_function
         self.weight = np.random.rand(prev_num_neurons, num_neurons).T
 
     def forward(self, x_input: np.array) -> np.array:
+        if self.bias is None:
+            self.bias = np.random.randn(self.num_neurons, x_input.shape[1])
         self.last_input = x_input
-        self.last_output = np.dot(self.weight, x_input) + self.bias
+        self.last_output = np.dot(self.weight, x_input)
+        self.last_output = self.last_output + self.bias
         return self.activationFunction.calculate(self.last_output)
 
     def update_weight(self, learning_rate: float, grads: np.array):
@@ -79,18 +82,16 @@ class NeuralNetwork(SupervisedModel):
                 print("Stopping model training early")
                 break
 
-            for j, example in enumerate(input_data):
-                # FIXME!
-                var = example.reshape(-1, 1)
-                output = self.predict(var)
-                # FIXME check the expected value type: should be a np.array (check the case when we have single value)
-                bias_grads, weight_grads = self.back_propagation(output, expected_output[j].reshape(-1, 1))
-                self.update_biases(bias_grads, self.learning_rate)
-                self.update_weight(weight_grads, self.learning_rate)
+            # FIXME!
+            output = self.predict(input_data)
+            # FIXME check the expected value type: should be a np.array (check the case when we have single value)
+            bias_grads, weight_grads = self.back_propagation(output, expected_output)
+            self.update_biases(bias_grads, self.learning_rate)
+            self.update_weight(weight_grads, self.learning_rate)
 
             if i % 100 == 0 and i != 0:
-                output = self.predict(var)
-                error = self.cost_function.calculate(output.reshape(-1, 1), expected_output[j].reshape(-1, 1))
+                output = self.predict(input_data)
+                error = self.cost_function.calculate(output, expected_output)
                 iteration_outputs.append(np.max(error))
                 stept.append(i)
 
@@ -117,7 +118,6 @@ class NeuralNetwork(SupervisedModel):
 
         gradient = self.cost_function.calculate_gradient(result, expected)
 
-        # FIXME check index out of the range
         for layer in self.hidden_layers[::-1]:
             z = layer.last_output
             zz = layer.activationFunction.calculate(z)
@@ -125,7 +125,8 @@ class NeuralNetwork(SupervisedModel):
             # element-wise multiplication
             gradient = np.multiply(gradient, layer.activationFunction.calculate_gradient(zz))
 
-            bias.append(np.sum(gradient, axis=1, keepdims=True))
+            # np.sum(gradient, axis=1, keepdims=True)
+            bias.append(gradient)
             weight.append(np.dot(gradient, layer.last_input.T))
 
             gradient = np.dot(layer.weight.T, gradient)

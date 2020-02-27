@@ -14,8 +14,8 @@ class XorExample(ExampleTemplate):
         )
 
     def define_data(self):
-        self.training_data = self.get_columns_between_a_and_b(self.get_data(), 0, 1)
-        self.expected_output = self.get_column(self.get_data(), 2)
+        self.training_data = self.get_columns_between_a_and_b(self.get_data(), 0, 1).T
+        self.expected_output = self.get_column(self.get_data(), 2).T
 
     def define_architecture(self):
         self.architecture = []

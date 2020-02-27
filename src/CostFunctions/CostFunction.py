@@ -9,7 +9,7 @@ import numpy as np
 class CostFunction(ABC):
 
     @abstractmethod
-    def calculate(self, value: np.array, expected_value: np.array) -> float:
+    def calculate(self, value: np.array, expected_value: np.array) -> np.array:
         pass
 
     @abstractmethod
@@ -19,8 +19,9 @@ class CostFunction(ABC):
 
 class MeanAbsoluteError(CostFunction):
 
-    def calculate(self, value: np.array, expected_value: np.array) -> float:
-        return float(np.sum(np.absolute(value - expected_value)).astype("float"))
+    #FIXME
+    def calculate(self, value: np.array, expected_value: np.array) -> np.array:
+        return np.sum(np.absolute(value - expected_value))
 
     def calculate_gradient(self, value: np.array, expected_value: np.array) -> np.array:
         return np.vectorize(lambda x: -1 if x > 0 else 1)(value - expected_value)
@@ -28,11 +29,10 @@ class MeanAbsoluteError(CostFunction):
 
 class MeanSquaredError(CostFunction):
 
-    def calculate(self, value: np.array, expected_value: np.array) -> float:
+    def calculate(self, value: np.array, expected_value: np.array) -> np.array:
         sqr = value - expected_value
         sqr = np.dot(sqr.T, sqr)
         sqr /= 2
-        sqr = float(sqr.astype("float"))
         return sqr
 
     def calculate_gradient(self, value: np.array, expected_value: np.array) -> np.array:
