@@ -89,13 +89,14 @@ class NeuralNetwork(SupervisedModel):
             self.update_biases(bias_grads, self.learning_rate)
             self.update_weight(weight_grads, self.learning_rate)
 
-            if i % 100 == 0 and i != 0:
-                output = self.predict(input_data)
-                error = self.cost_function.calculate(output, expected_output)
-                iteration_outputs.append(np.max(error))
-                stept.append(i)
-
-                print(i, error * 100)
+            if i % 1 == 0 and i != 0:
+                # output = self.predict(input_data)
+                # error = self.cost_function.calculate(output, expected_output)
+                # iteration_outputs.append(np.max(error))
+                # stept.append(i)
+                #
+                # print(i, error * 100)
+                print(i)
 
         toc = time.time()
         fig, ax = plt.subplots()
