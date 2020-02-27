@@ -125,7 +125,7 @@ class NeuralNetwork(SupervisedModel):
             # element-wise multiplication
             gradient = np.multiply(gradient, layer.activationFunction.calculate_gradient(zz))
 
-            bias.append(gradient)
+            bias.append(np.sum(gradient, axis=1, keepdims=True))
             weight.append(np.dot(gradient, layer.last_input.T))
 
             gradient = np.dot(layer.weight.T, gradient)

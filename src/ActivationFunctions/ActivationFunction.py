@@ -42,3 +42,14 @@ class TanH(ActivationFunction):
 
     def calculate(self, value: np.array) -> np.array:
         return np.tanh(value)
+
+
+class SoftMax(ActivationFunction):
+
+    def calculate_gradient(self, value: np.array) -> np.array:
+        calculated_value = self.calculate(value)
+        return -np.outer(calculated_value, calculated_value) + np.diag(calculated_value.flatten())
+
+    def calculate(self, value: np.array) -> np.array:
+        e_value = np.exp(value - np.max(value))
+        return e_value / np.sum(e_value)
