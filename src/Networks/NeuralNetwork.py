@@ -5,48 +5,25 @@ from src.CostFunctions import CostFunction
 from src.ActivationFunctions.ActivationFunction import *
 import matplotlib.pyplot as plt
 
+from src.Networks.Layer import Layer
 from src.Networks.SupervisedModel import SupervisedModel
+from src.Regularizations.NormRegularizationFunction import NormRegularizationFunction, VoidNormRegularizationFunction, L2WeightDecay
 from src.Regularizations.EarlyStoppingRegularization import StoppingCondition, VoidStoppingCondition
-
-
-class Layer:
-    bias: np.array = None
-    weight: np.array = None
-    num_neurons: int = None
-    last_input: np.array = None
-    last_output: np.array = None
-    activationFunction: ActivationFunction = None
-
-    def __init__(self, num_neurons: int, prev_num_neurons: int, activation_function: ActivationFunction = Relu()):
-        self.num_neurons = num_neurons
-        self.activationFunction = activation_function
-        self.weight = np.random.rand(prev_num_neurons, num_neurons).T
-        self.bias = np.random.rand(self.num_neurons, 1)
-
-    def forward(self, x_input: np.array) -> np.array:
-        self.last_input = x_input
-        self.last_output = np.dot(self.weight, x_input)
-        self.last_output = self.last_output + self.bias
-        return self.activationFunction.calculate(self.last_output)
-
-    def update_weight(self, learning_rate: float, grads: np.array):
-        assert self.weight.shape == grads.shape
-        self.weight = self.weight - grads * learning_rate / self.last_input.shape[1]
-
-    def update_bias(self, learning_rate: float, grads: np.array):
-        # takes the average gradient for each batch to be applied to the overall bias
-        # print(grads.shape, self.bias.shape, self.last_input.shape[1], sep='\t')
-        g = np.sum(grads, axis=1, keepdims=True) / self.last_input.shape[1]
-        assert self.bias.shape == g.shape
-        self.bias = self.bias - g * learning_rate
 
 
 class NeuralNetwork(SupervisedModel):
 
-    def __init__(self, num_inputs: int, hidden_architecture: List[Tuple[int, ActivationFunction]],
-                 num_output: int, cost_function: CostFunction, learning_rate: float = 0.001,
-                 iterations: int = 1000, stopping_condition: StoppingCondition = VoidStoppingCondition(),
-                 output_activation_function: ActivationFunction = Sigmoid()):
+    def __init__(self,
+                 num_inputs: int,
+                 hidden_architecture: List[Tuple[int, ActivationFunction]],
+                 num_output: int,
+                 cost_function: CostFunction,
+                 learning_rate: float = 0.001,
+                 iterations: int = 1000,
+                 stopping_condition: StoppingCondition = VoidStoppingCondition(),
+                 output_activation_function: ActivationFunction = Sigmoid(),
+                 regularization_rate: float = 0.01,
+                 regularization_function: NormRegularizationFunction = L2WeightDecay()):
         self.hidden_layers = []
         self.num_output = num_output
         self.num_inputs = num_inputs
@@ -54,6 +31,8 @@ class NeuralNetwork(SupervisedModel):
         self.learning_rate = learning_rate
         self.iterations = iterations
         self.stopping_condition = stopping_condition
+        self.regularization_rate = regularization_rate
+        self.regularization_function = regularization_function
 
         for layer in hidden_architecture:
             self.__add_layer(layer[0], layer[1])
@@ -91,8 +70,13 @@ class NeuralNetwork(SupervisedModel):
             self.update_weight(weight_grads, self.learning_rate)
 
             if i % 10 == 0 and i != 0:
+                regularization_penalty = 0.0
+                for layer in self.hidden_layers:
+                    regularization_penalty += np.sum(self.regularization_rate \
+                                              * self.regularization_function.calculate(layer))
+
                 output = self.predict(input_data)
-                error = self.cost_function.calculate(output, expected_output)
+                error = self.cost_function.calculate(output, expected_output) + regularization_penalty
                 iteration_outputs.append(error)
                 stept.append(i)
 
@@ -127,8 +111,10 @@ class NeuralNetwork(SupervisedModel):
             # element-wise multiplication
             gradient = np.multiply(gradient, layer.activationFunction.calculate_gradient(zz))
 
-            bias.append(gradient)
-            weight.append(np.dot(gradient, layer.last_input.T))
+            bias.append(gradient
+                        + self.regularization_rate * self.regularization_function.calculate_gradient_bias(layer))
+            weight.append(np.dot(gradient, layer.last_input.T)
+                          + self.regularization_rate * self.regularization_function.calculate_gradient_weights(layer))
 
             gradient = np.dot(layer.weight.T, gradient)
 

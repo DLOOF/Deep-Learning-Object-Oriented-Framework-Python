@@ -42,8 +42,8 @@ class RelationExample(ExampleTemplate):
         self.cost_function = MeanSquaredError()
 
     def define_training_hyperparameters(self):
-        self.learning_rate = 0.1
-        self.iterations = 10_000
+        self.learning_rate = 0.05
+        self.iterations = 100_000
 
     def run_tests(self):
         r = self.neural_net.predict(np.array([1, 1, 0, 0, 0, 0]).reshape(-1, 1)).T

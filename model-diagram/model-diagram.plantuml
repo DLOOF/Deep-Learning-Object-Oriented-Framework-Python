@@ -15,6 +15,7 @@ class NeuralNetwork {
       - num_ouputs: int
       - learning_rate: float
       - iterations: int
+      - regularization_rate: float
 
       + backprop(output, expected): Tuple[List[Matrix],List[Vector]]
 }
@@ -76,15 +77,18 @@ SupervisedModel <|-- BaggingRegularization
 BaggingRegularization --> "1..*" SupervisedModel : models >
 
 abstract class NormPenaltyRegularization {
-	 {abstract} + calculate(value: Vector): float
-	 {abstract} + calculateGradient(value: Vector): Vector
+	 {abstract} + calculate(layer: Layer): float
+	 {abstract} + calculateGradientWeight(layer: Layer): Matrix
+	 {abstract} + calculateGradientBiase(layer: Layer): Vector
 }
+
+NeuralNetwork --> "0..1" NormPenaltyRegularization: regularizationFunction >
 
 class L1WeightDecay
 class L2WeightDecay
 
 NormPenaltyRegularization <|-- L1WeightDecay
 NormPenaltyRegularization <|-- L2WeightDecay
-CostFunction --> "0..1" NormPenaltyRegularization : regularizationFunction >
+' CostFunction --> "0..1" NormPenaltyRegularization : regularizationFunction >
 
 @enduml
