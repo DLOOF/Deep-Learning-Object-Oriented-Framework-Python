@@ -2,6 +2,8 @@ from src.ActivationFunctions.ActivationFunction import *
 from src.CostFunctions.CostFunction import *
 from src.ExampleTemplate import ExampleTemplate
 
+from functools import lru_cache
+
 from mnist import MNIST
 
 
@@ -14,6 +16,7 @@ class MnistExample(ExampleTemplate):
 
         return tmp
 
+    @lru_cache()
     def get_data(self) -> np.array:
         mnist = MNIST('../datasets/mnist')
         x_train, y_train = mnist.load_training()  # 60000 samples
@@ -56,16 +59,17 @@ class MnistExample(ExampleTemplate):
 
     def define_training_hyperparameters(self):
         self.learning_rate = 0.01
-        self.iterations = 2000
+        self.iterations = 100
 
     def run_tests(self):
         _, _, x_test, y_test = self.get_data()
         import random
         errors = []
         for x, y in random.sample(list(zip(x_test, y_test)), k=2000):
+            # print(x, y, sep="\t")
             y_predicted = self.neural_net.predict(x)
             d = y - y_predicted
-            error = np.dot(d.T, d)
+            error = np.linalg.norm(d, 2)
             errors.append(error)
 
         print("Mean error %.3f" % np.mean(np.asarray(errors)))

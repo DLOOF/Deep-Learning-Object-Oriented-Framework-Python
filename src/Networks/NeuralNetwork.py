@@ -19,13 +19,11 @@ class Layer:
 
     def __init__(self, num_neurons: int, prev_num_neurons: int, activation_function: ActivationFunction = Relu()):
         self.num_neurons = num_neurons
-        self.bias = None
         self.activationFunction = activation_function
         self.weight = np.random.rand(prev_num_neurons, num_neurons).T
+        self.bias = np.random.rand(self.num_neurons, 1)
 
     def forward(self, x_input: np.array) -> np.array:
-        if self.bias is None:
-            self.bias = np.random.randn(self.num_neurons, x_input.shape[1])
         self.last_input = x_input
         self.last_output = np.dot(self.weight, x_input)
         self.last_output = self.last_output + self.bias
@@ -33,18 +31,22 @@ class Layer:
 
     def update_weight(self, learning_rate: float, grads: np.array):
         assert self.weight.shape == grads.shape
-        self.weight = self.weight - grads * learning_rate
+        self.weight = self.weight - grads * learning_rate / self.last_input.shape[1]
 
     def update_bias(self, learning_rate: float, grads: np.array):
-        assert self.bias.shape == grads.shape
-        self.bias = self.bias - grads * learning_rate
+        # takes the average gradient for each batch to be applied to the overall bias
+        # print(grads.shape, self.bias.shape, self.last_input.shape[1], sep='\t')
+        g = np.sum(grads, axis=1, keepdims=True) / self.last_input.shape[1]
+        assert self.bias.shape == g.shape
+        self.bias = self.bias - g * learning_rate
 
 
 class NeuralNetwork(SupervisedModel):
 
     def __init__(self, num_inputs: int, hidden_architecture: List[Tuple[int, ActivationFunction]],
                  num_output: int, cost_function: CostFunction, learning_rate: float = 0.001,
-                 iterations: int = 1000, stopping_condition: StoppingCondition = VoidStoppingCondition()):
+                 iterations: int = 1000, stopping_condition: StoppingCondition = VoidStoppingCondition(),
+                 output_activation_function: ActivationFunction = Sigmoid()):
         self.hidden_layers = []
         self.num_output = num_output
         self.num_inputs = num_inputs
@@ -55,8 +57,7 @@ class NeuralNetwork(SupervisedModel):
 
         for layer in hidden_architecture:
             self.__add_layer(layer[0], layer[1])
-        # TODO should be able to specify the output activation function e.g. Softmax
-        self.__add_layer(num_output, Sigmoid())
+        self.__add_layer(num_output, output_activation_function)
 
     def __add_layer(self, num_neurons: int, activation_function: ActivationFunction):
         prev_num_neurons = self.__get_prev_num_neurons()
@@ -89,21 +90,21 @@ class NeuralNetwork(SupervisedModel):
             self.update_biases(bias_grads, self.learning_rate)
             self.update_weight(weight_grads, self.learning_rate)
 
-            if i % 1 == 0 and i != 0:
-                # output = self.predict(input_data)
-                # error = self.cost_function.calculate(output, expected_output)
-                # iteration_outputs.append(np.max(error))
-                # stept.append(i)
-                #
-                # print(i, error * 100)
-                print(i)
+            if i % 10 == 0 and i != 0:
+                output = self.predict(input_data)
+                error = self.cost_function.calculate(output, expected_output)
+                iteration_outputs.append(error)
+                stept.append(i)
+
+                print("%d %.3f%%" % (i, error * 100.0))
+                # print("Overall accuracy: %.3f%%" % (accuracy))
 
         toc = time.time()
         fig, ax = plt.subplots()
         ax.plot(stept, iteration_outputs)
         ax.set_xlabel('iterations')
         ax.set_ylabel('error')
-        ax.set_title('Xor')
+        ax.set_title('Training error')
         plt.show()
 
         print(f"Training finished! {toc - tic}")
@@ -126,7 +127,6 @@ class NeuralNetwork(SupervisedModel):
             # element-wise multiplication
             gradient = np.multiply(gradient, layer.activationFunction.calculate_gradient(zz))
 
-            # np.sum(gradient, axis=1, keepdims=True)
             bias.append(gradient)
             weight.append(np.dot(gradient, layer.last_input.T))
 
@@ -137,9 +137,7 @@ class NeuralNetwork(SupervisedModel):
     def update_biases(self, bias_grads, learning_rate):
         for i, layer in enumerate(self.hidden_layers[::-1]):
             layer.update_bias(learning_rate, bias_grads[i])
-        pass
 
     def update_weight(self, weight_grads, learning_rate):
         for i, layer in enumerate(self.hidden_layers[::-1]):
             layer.update_weight(learning_rate, weight_grads[i])
-        pass

@@ -31,8 +31,8 @@ class MeanSquaredError(CostFunction):
 
     def calculate(self, value: np.array, expected_value: np.array) -> np.array:
         sqr = value - expected_value
-        sqr = np.dot(sqr.T, sqr)
-        sqr /= 2
+        sqr = np.linalg.norm(sqr, 2)**2
+        sqr /= 2.0
         return sqr
 
     def calculate_gradient(self, value: np.array, expected_value: np.array) -> np.array:
