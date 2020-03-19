@@ -1,11 +1,11 @@
-from src.ActivationFunctions.ActivationFunction import *
-from src.BatchFunctions.BatchFunction import MiniBatch, MiniBatchNormalized
-from src.CostFunctions.CostFunction import *
-from src.ExampleTemplate import ExampleTemplate
-
 from functools import lru_cache
 
 from mnist import MNIST
+
+from src.ActivationFunctions.ActivationFunction import *
+from src.BatchFunctions.BatchFunction import MiniBatchNormalized
+from src.CostFunctions.CostFunction import *
+from src.ExampleTemplate import ExampleTemplate
 
 
 class MnistExample(ExampleTemplate):

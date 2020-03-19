@@ -1,4 +1,3 @@
-import numpy as np
 from mnist import MNIST
 from sklearn.preprocessing import OneHotEncoder
 

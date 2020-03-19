@@ -1,5 +1,7 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
+
 import numpy as np
+
 from src.ActivationFunctions.ActivationFunction import ActivationFunction
 
 

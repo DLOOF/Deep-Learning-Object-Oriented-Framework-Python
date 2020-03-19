@@ -1,6 +1,7 @@
-import numpy as np
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import List
+
+import numpy as np
 
 from src.Networks.SupervisedModel import SupervisedModel
 

@@ -1,5 +1,6 @@
-import numpy as np
 from typing import List
+
+import numpy as np
 
 
 def partition_data(input_data: np.array, training_set_percentage: float, development_set_percentage: float,
