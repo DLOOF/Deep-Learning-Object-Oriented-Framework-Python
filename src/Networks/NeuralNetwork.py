@@ -1,6 +1,8 @@
 import time
 from typing import List, Tuple
 
+from src.BatchFunctions import BatchFunction
+from src.BatchFunctions.BatchFunction import BatchMode
 from src.CostFunctions import CostFunction
 from src.ActivationFunctions.ActivationFunction import *
 import matplotlib.pyplot as plt
@@ -19,17 +21,17 @@ class NeuralNetwork(SupervisedModel):
                  num_output: int,
                  cost_function: CostFunction,
                  learning_rate: float = 0.001,
-                 iterations: int = 1000,
+                 epochs: int = 1000,
                  stopping_condition: StoppingCondition = VoidStoppingCondition(),
                  output_activation_function: ActivationFunction = Sigmoid(),
-                 regularization_rate: float = 0.01,
+                 regularization_rate: float = 0.00,
                  regularization_function: NormRegularizationFunction = L2WeightDecay()):
         self.hidden_layers = []
         self.num_output = num_output
         self.num_inputs = num_inputs
         self.cost_function = cost_function
         self.learning_rate = learning_rate
-        self.iterations = iterations
+        self.epochs = epochs
         self.stopping_condition = stopping_condition
         self.regularization_rate = regularization_rate
         self.regularization_function = regularization_function
@@ -50,26 +52,30 @@ class NeuralNetwork(SupervisedModel):
         else:
             return self.hidden_layers[-1].num_neurons
 
-    def train(self, input_data: np.array, expected_output: np.array):
+    def train(self, input_data: np.array, expected_output: np.array, batch_function: BatchFunction = None):
         print("Starting training!")
         tic = time.time()
         iteration_outputs = []
         stept = []
 
-        for i in range(self.iterations):
+        # by default use batch mode (e.g. the whole dataset at once)
+        if batch_function is None:
+            batch_function = BatchMode(input_data, expected_output)
+
+        for i in range(self.epochs):
             # FIXME: should add the validation set to the stopping condition
             if self.stopping_condition.should_stop(self, input_data, expected_output):
                 print("Stopping model training early")
                 break
 
-            # FIXME!
-            output = self.predict(input_data)
-            # FIXME check the expected value type: should be a np.array (check the case when we have single value)
-            bias_grads, weight_grads = self.back_propagation(output, expected_output)
-            self.update_biases(bias_grads, self.learning_rate)
-            self.update_weight(weight_grads, self.learning_rate)
+            for batch_input, batch_expected in batch_function.get_batch():
+                output = self.predict(batch_input)
+                # FIXME check the expected value type: should be a np.array (check the case when we have single value)
+                bias_grads, weight_grads = self.back_propagation(output, batch_expected)
+                self.update_biases(bias_grads, self.learning_rate)
+                self.update_weight(weight_grads, self.learning_rate)
 
-            if i % 10 == 0 and i != 0:
+            if i % 1 == 0 and i != 0:
                 regularization_penalty = 0.0
                 for layer in self.hidden_layers:
                     regularization_penalty += np.sum(self.regularization_rate \
