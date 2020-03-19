@@ -17,18 +17,52 @@ class NeuralNetwork {
       - iterations: int
       - regularization_rate: float
 
+      + train(input: Vector, expectedOutput: Vector, batch_function: BatchFunction): void
       + backprop(output, expected): Tuple[List[Matrix],List[Vector]]
 }
 
 SupervisedModel <|-- NeuralNetwork
 
-class Layer {
+abstract class Layer {
       - bias: Vector
       - weights: Matrix
       - units: int
-
-      + forward(input: Vector): Vector
+      
+      {abstract} + forward(input: Vector): Vector
+      {abstract} + backward(gradient: Vector, learning_rate: float): Vector
+      {abstract} + update_weight(learning_rate: float, grads: Vector): void
+      {abstract} + update_bias(learning_rate: float, grads: Vector): void
 }
+
+class ClassicLayer
+class ConvolutionLayer
+abstract class PoolingLayer
+
+Layer <|-- ClassicLayer
+Layer <|-- ConvolutionLayer
+Layer <|-- PoolingLayer
+
+class MaxPooling
+class AvgPooling
+
+PoolingLayer <|-- MaxPooling
+PoolingLayer <|-- AvgPooling
+
+abstract class InitializationFunction {
+	 {abstract} + initialize(x: int, y: int): Matrix
+}
+
+ClassicLayer --> "1" InitializationFunction: initFunction >
+
+class Random
+class He
+class Xavier
+class Other
+
+InitializationFunction <|-- Random
+InitializationFunction <|-- He
+InitializationFunction <|-- Xavier
+InitializationFunction <|-- Other
 
 abstract class CostFunction {
       {abstract} + calculate(value, expected_value): float
@@ -44,8 +78,7 @@ NeuralNetwork -- "1" CostFunction : costFunction >
 NeuralNetwork --> "*" Layer : hiddenLayers >
 ' NeuralNetwork --> "1" Layer : outputLayer >
 
-Layer --> "1" ActivationFunction : activationFunction >
-
+ClassicLayer --> "1" ActivationFunction : activationFunction >
 
 
 CostFunction <|-- MeanAbsoluteError
@@ -90,5 +123,24 @@ class L2WeightDecay
 NormPenaltyRegularization <|-- L1WeightDecay
 NormPenaltyRegularization <|-- L2WeightDecay
 ' CostFunction --> "0..1" NormPenaltyRegularization : regularizationFunction >
+
+abstract class BatchFunction {
+	 {abstract} + _(input_data: Matrix, expected_output: Matrix): void
+	 {abstract} + get_batch(): Tuple[Matrix, Matrix]
+}
+
+class BatchMode
+
+class MiniBatch
+
+class MiniBatchNormalized {
+      {static} - epsilon: float
+}
+
+NeuralNetwork --> "1" BatchFunction: batchFunction >
+
+BatchFunction <|-- BatchMode
+BatchFunction <|-- MiniBatch
+MiniBatch <|-- MiniBatchNormalized
 
 @enduml
