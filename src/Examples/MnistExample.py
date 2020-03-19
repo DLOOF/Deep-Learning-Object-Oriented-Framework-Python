@@ -5,7 +5,7 @@ from mnist import MNIST
 from src.BatchFunctions.BatchFunction import MiniBatchNormalized
 from src.CostFunctions.CostFunction import *
 from src.Examples.ExampleTemplate import ExampleTemplate
-from src.Networks.Layer.ClassicLayer import ClassicLayer, Sigmoid
+from src.Networks.Layer.ClassicLayer import ClassicLayer, Sigmoid, TanH, Xavier
 
 
 class MnistExample(ExampleTemplate):
@@ -44,22 +44,26 @@ class MnistExample(ExampleTemplate):
     def define_architecture(self):
         self.architecture = []
 
-        layer_1 = ClassicLayer(784)
-        layer_2 = ClassicLayer(10)
-        layer_3 = ClassicLayer(10)
-        layer_4 = ClassicLayer(10, Sigmoid())
+        layer_1 = ClassicLayer(784, TanH(), Xavier())
+        layer_2 = ClassicLayer(300, TanH(), Xavier())
+        layer_3 = ClassicLayer(300, TanH(), Xavier())
+        layer_4 = ClassicLayer(300, TanH(), Xavier())
+        layer_5 = ClassicLayer(300, TanH(), Xavier())
+        layer_6 = ClassicLayer(10, Sigmoid(), Xavier())
 
         self.architecture.append(layer_1)
         self.architecture.append(layer_2)
-        # self.architecture.append(layer_3)
+        self.architecture.append(layer_3)
         self.architecture.append(layer_4)
+        self.architecture.append(layer_5)
+        self.architecture.append(layer_6)
 
         self.cost_function = MeanSquaredError()
 
     def define_training_hyperparameters(self):
         self.learning_rate = 0.2
-        self.iterations = 25
-        self.batch_function = MiniBatchNormalized(self.training_data, self.expected_output, 2000)
+        self.iterations = 7
+        self.batch_function = MiniBatchNormalized(self.training_data, self.expected_output, 200)
 
     def run_tests(self):
         _, _, x_test, y_test = self.get_data()
