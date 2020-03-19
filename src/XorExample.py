@@ -1,4 +1,5 @@
 from src.ActivationFunctions.ActivationFunction import *
+from src.BatchFunctions.BatchFunction import MiniBatch
 from src.CostFunctions.CostFunction import *
 from src.ExampleTemplate import ExampleTemplate
 
@@ -37,6 +38,7 @@ class XorExample(ExampleTemplate):
     def define_training_hyperparameters(self):
         self.learning_rate = 0.1
         self.iterations = 10_000
+        self.batch_function = MiniBatch(self.training_data, self.expected_output, 1)
 
     def run_tests(self):
         print(f" [0, 0] = {self.neural_net.predict(np.array([0, 0]).reshape(-1, 1))}")
