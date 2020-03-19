@@ -2,10 +2,10 @@ from functools import lru_cache
 
 from mnist import MNIST
 
-from src.ActivationFunctions.ActivationFunction import *
 from src.BatchFunctions.BatchFunction import MiniBatchNormalized
 from src.CostFunctions.CostFunction import *
-from src.ExampleTemplate import ExampleTemplate
+from src.Examples.ExampleTemplate import ExampleTemplate
+from src.Networks.Layer.ClassicLayer import ClassicLayer
 
 
 class MnistExample(ExampleTemplate):
@@ -43,13 +43,11 @@ class MnistExample(ExampleTemplate):
 
     def define_architecture(self):
         self.architecture = []
-        self.input_neurons = 784
-        self.output_neurons = 10
 
-        layer_1 = (10, Relu())
-        layer_2 = (10, Relu())
-        layer_3 = (4, Relu())
-        layer_4 = (4, Relu())
+        layer_1 = ClassicLayer(10)
+        layer_2 = ClassicLayer(10)
+        layer_3 = ClassicLayer(4)
+        layer_4 = ClassicLayer(4)
 
         self.architecture.append(layer_1)
         self.architecture.append(layer_2)

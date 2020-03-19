@@ -12,8 +12,6 @@ class ExampleTemplate(ABC):
     def __init__(self, experiment_name):
         self.experiment_name = experiment_name
         self.expected_output = None
-        self.output_neurons = None
-        self.input_neurons = None
         self.training_data = None
         self.learning_rate = None
         self.cost_function = None
@@ -23,17 +21,16 @@ class ExampleTemplate(ABC):
         self.batch_function: BatchFunction = None
 
     def build_neuronal_net(self):
-        self.neural_net = NeuralNetwork(self.input_neurons, self.architecture, self.output_neurons,
-                                        self.cost_function, self.learning_rate, self.iterations)
+        self.neural_net = NeuralNetwork(self.architecture, self.cost_function, self.learning_rate, self.iterations)
 
     def train_and_save_nn(self):
         self.neural_net.train(self.training_data, self.expected_output, self.batch_function)
-        with open(f'{self.experiment_name}-{self.input_neurons}-{len(self.architecture)}-{self.output_neurons}.nn',
+        with open(f'{self.experiment_name}-{len(self.architecture)}-.nn',
                   'wb') as file:
             pickle.dump(self.neural_net, file)
 
     def load_net_from_file(self):
-        with open(f'{self.experiment_name}-{self.input_neurons}-{len(self.architecture)}-{self.output_neurons}.nn',
+        with open(f'{self.experiment_name}-{len(self.architecture)}-.nn',
                   'rb') as file:
             self.neural_net = pickle.load(file)
 

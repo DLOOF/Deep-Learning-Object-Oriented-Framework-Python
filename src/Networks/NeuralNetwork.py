@@ -1,5 +1,5 @@
 import time
-from typing import List, Tuple
+from typing import List
 
 import matplotlib.pyplot as plt
 
@@ -7,7 +7,7 @@ from src.ActivationFunctions.ActivationFunction import *
 from src.BatchFunctions import BatchFunction
 from src.BatchFunctions.BatchFunction import BatchMode
 from src.CostFunctions import CostFunction
-from src.Networks.Layer.ClassicLayer import ClassicLayer
+from src.Networks.Layer import Layer
 from src.Networks.SupervisedModel import SupervisedModel
 from src.Regularizations.EarlyStoppingRegularization import StoppingCondition, VoidStoppingCondition
 from src.Regularizations.NormRegularizationFunction import NormRegularizationFunction, L2WeightDecay
@@ -16,39 +16,19 @@ from src.Regularizations.NormRegularizationFunction import NormRegularizationFun
 class NeuralNetwork(SupervisedModel):
 
     def __init__(self,
-                 num_inputs: int,
-                 hidden_architecture: List[Tuple[int, ActivationFunction]],
-                 num_output: int,
+                 layers: List[Layer],
                  cost_function: CostFunction,
                  learning_rate: float = 0.001,
                  epochs: int = 1000,
                  stopping_condition: StoppingCondition = VoidStoppingCondition(),
-                 output_activation_function: ActivationFunction = Sigmoid(),
                  regularization_function: NormRegularizationFunction = L2WeightDecay(0.01)):
-        self.hidden_layers = []
-        self.num_output = num_output
-        self.num_inputs = num_inputs
+
+        self.layers = layers
         self.cost_function = cost_function
         self.learning_rate = learning_rate
         self.epochs = epochs
         self.stopping_condition = stopping_condition
         self.regularization_function = regularization_function
-
-        for layer in hidden_architecture:
-            self.__add_layer(layer[0], layer[1])
-        self.__add_layer(num_output, output_activation_function)
-
-    def __add_layer(self, num_neurons: int, activation_function: ActivationFunction):
-        prev_num_neurons = self.__get_prev_num_neurons()
-        new_layer = ClassicLayer(num_neurons, prev_num_neurons, activation_function)
-        self.hidden_layers.append(new_layer)
-
-    def __get_prev_num_neurons(self) -> int:
-        is_no_hidden_layer = len(self.hidden_layers) == 0
-        if is_no_hidden_layer:
-            return self.num_inputs
-        else:
-            return self.hidden_layers[-1].num_neurons
 
     def train(self, input_data: np.array, expected_output: np.array, batch_function: BatchFunction = None):
         print("Starting training!")
@@ -72,7 +52,7 @@ class NeuralNetwork(SupervisedModel):
 
             if i % 1 == 0 and i != 0:
                 regularization_penalty = 0.0
-                for layer in self.hidden_layers:
+                for layer in self.layers:
                     regularization_penalty += np.sum(self.regularization_function.calculate(layer))
 
                 output = self.predict(input_data)
@@ -100,11 +80,11 @@ class NeuralNetwork(SupervisedModel):
         print(f"Training finished! {toc - tic}")
 
     def predict(self, x_input: np.array) -> np.array:
-        for layer in self.hidden_layers:
+        for layer in self.layers:
             x_input = layer.forward(x_input)
         return x_input
 
     def back_propagation(self, result, expected):
         gradient = self.cost_function.calculate_gradient(result, expected)
-        for layer in self.hidden_layers[::-1]:
+        for layer in self.layers[::-1]:
             gradient = layer.backward(gradient, self.learning_rate, self.regularization_function)

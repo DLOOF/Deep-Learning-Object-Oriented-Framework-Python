@@ -1,7 +1,7 @@
-from src.ActivationFunctions.ActivationFunction import *
 from src.BatchFunctions.BatchFunction import MiniBatch
 from src.CostFunctions.CostFunction import *
-from src.ExampleTemplate import ExampleTemplate
+from src.Examples.ExampleTemplate import ExampleTemplate
+from src.Networks.Layer.ClassicLayer import ClassicLayer
 
 
 class XorExample(ExampleTemplate):
@@ -20,13 +20,11 @@ class XorExample(ExampleTemplate):
 
     def define_architecture(self):
         self.architecture = []
-        self.input_neurons = 2
-        self.output_neurons = 1
 
-        layer_1 = (2, Relu())
-        layer_2 = (4, Relu())
-        layer_3 = (4, Relu())
-        layer_4 = (4, Relu())
+        layer_1 = ClassicLayer(2)
+        layer_2 = ClassicLayer(4)
+        layer_3 = ClassicLayer(4)
+        layer_4 = ClassicLayer(4)
 
         self.architecture.append(layer_1)
         # self.architecture.append(layer_2)

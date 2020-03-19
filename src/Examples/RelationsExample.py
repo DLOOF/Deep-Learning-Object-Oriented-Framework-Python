@@ -1,7 +1,7 @@
-from src.ActivationFunctions.ActivationFunction import *
 from src.BatchFunctions.BatchFunction import MiniBatch
 from src.CostFunctions.CostFunction import *
-from src.ExampleTemplate import ExampleTemplate
+from src.Examples.ExampleTemplate import ExampleTemplate
+from src.Networks.Layer.ClassicLayer import ClassicLayer
 
 
 class RelationExample(ExampleTemplate):
@@ -31,11 +31,9 @@ class RelationExample(ExampleTemplate):
 
     def define_architecture(self):
         self.architecture = []
-        self.input_neurons = 6
-        self.output_neurons = 2
 
-        layer_1 = (8, Relu())
-        layer_2 = (8, Relu())
+        layer_1 = ClassicLayer(8)
+        layer_2 = ClassicLayer(8)
 
         self.architecture.append(layer_1)
         self.architecture.append(layer_2)

@@ -6,20 +6,27 @@ from src.Regularizations import NormRegularizationFunction
 
 class ClassicLayer(Layer):
 
-    def __init__(self, num_neurons: int, prev_num_neurons: int, activation_function: ActivationFunction = Relu(),
+    def __init__(self, num_neurons: int, activation_function: ActivationFunction = Relu(),
                  initialization_function: InitializationFunction = He()):
         super().__init__()
-        self.initialization_function = initialization_function
         self.num_neurons = num_neurons
         self.activationFunction = activation_function
-        self.weight = initialization_function.initialize(prev_num_neurons, num_neurons).T
+        self.initialization_function = initialization_function
         self.bias = initialization_function.initialize(self.num_neurons, 1)
 
     def forward(self, x_input: np.array) -> np.array:
+        self.__init_weight_late__(x_input)
+
         self.last_input = x_input
         self.last_output = np.dot(self.weight, x_input) + self.bias
         self.last_activation_output = self.activationFunction.calculate(self.last_output)
+
         return self.last_activation_output
+
+    def __init_weight_late__(self, x_input: np.array):
+        if self.weight is None:
+            prev_num_neurons, _ = x_input.shape
+            self.weight = self.initialization_function.initialize(prev_num_neurons, self.num_neurons).T
 
     def backward(self, gradient: np.array, learning_rate: float,
                  regularization_function: NormRegularizationFunction) -> np.array:

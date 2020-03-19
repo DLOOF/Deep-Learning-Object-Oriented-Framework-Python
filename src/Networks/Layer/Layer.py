@@ -8,6 +8,8 @@ from src.Regularizations import NormRegularizationFunction
 class Layer(ABC):
 
     def __init__(self):
+        self.bias = None
+        self.weight = None
         self.last_input = None
         self.last_output = None
         self.last_input_shape = None
