@@ -1,4 +1,5 @@
 from src.ActivationFunctions.ActivationFunction import *
+from src.BatchFunctions.BatchFunction import MiniBatch
 from src.CostFunctions.CostFunction import *
 from src.ExampleTemplate import ExampleTemplate
 
@@ -60,6 +61,7 @@ class MnistExample(ExampleTemplate):
     def define_training_hyperparameters(self):
         self.learning_rate = 0.01
         self.iterations = 100
+        self.batch_function = MiniBatch(self.training_data, self.expected_output, 200)
 
     def run_tests(self):
         _, _, x_test, y_test = self.get_data()

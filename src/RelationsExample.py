@@ -1,4 +1,5 @@
 from src.ActivationFunctions.ActivationFunction import *
+from src.BatchFunctions.BatchFunction import MiniBatch
 from src.CostFunctions.CostFunction import *
 from src.ExampleTemplate import ExampleTemplate
 
@@ -43,7 +44,8 @@ class RelationExample(ExampleTemplate):
 
     def define_training_hyperparameters(self):
         self.learning_rate = 0.05
-        self.iterations = 100_000
+        self.iterations = 1_500
+        self.batch_function = MiniBatch(self.training_data, self.expected_output, 1)
 
     def run_tests(self):
         r = self.neural_net.predict(np.array([1, 1, 0, 0, 0, 0]).reshape(-1, 1)).T
