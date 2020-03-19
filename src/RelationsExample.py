@@ -1,5 +1,5 @@
 from src.ActivationFunctions.ActivationFunction import *
-from src.BatchFunctions.BatchFunction import MiniBatch
+from src.BatchFunctions.BatchFunction import MiniBatch, MiniBatchNormalized
 from src.CostFunctions.CostFunction import *
 from src.ExampleTemplate import ExampleTemplate
 
