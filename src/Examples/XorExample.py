@@ -1,7 +1,7 @@
 from src.BatchFunctions.BatchFunction import MiniBatch
 from src.CostFunctions.CostFunction import *
 from src.Examples.ExampleTemplate import ExampleTemplate
-from src.Networks.Layer.ClassicLayer import ClassicLayer
+from src.Networks.Layer.ClassicLayer import ClassicLayer, Sigmoid
 
 
 class XorExample(ExampleTemplate):
@@ -23,12 +23,12 @@ class XorExample(ExampleTemplate):
 
         layer_1 = ClassicLayer(2)
         layer_2 = ClassicLayer(4)
-        layer_3 = ClassicLayer(4)
+        layer_3 = ClassicLayer(2, Sigmoid())
         layer_4 = ClassicLayer(4)
 
         self.architecture.append(layer_1)
-        # self.architecture.append(layer_2)
-        # self.architecture.append(layer_3)
+        self.architecture.append(layer_2)
+        self.architecture.append(layer_3)
         # self.architecture.append(layer_4)
 
         self.cost_function = MeanSquaredError()

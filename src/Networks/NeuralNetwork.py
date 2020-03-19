@@ -2,10 +2,9 @@ import time
 from typing import List
 
 import matplotlib.pyplot as plt
+import numpy as np
 
-from src.ActivationFunctions.ActivationFunction import *
-from src.BatchFunctions import BatchFunction
-from src.BatchFunctions.BatchFunction import BatchMode
+from src.BatchFunctions.BatchFunction import BatchMode, BatchFunction
 from src.CostFunctions import CostFunction
 from src.Networks.Layer import Layer
 from src.Networks.SupervisedModel import SupervisedModel
@@ -16,7 +15,7 @@ from src.Regularizations.NormRegularizationFunction import NormRegularizationFun
 class NeuralNetwork(SupervisedModel):
 
     def __init__(self,
-                 layers: List[Layer],
+                 layers,
                  cost_function: CostFunction,
                  learning_rate: float = 0.001,
                  epochs: int = 1000,

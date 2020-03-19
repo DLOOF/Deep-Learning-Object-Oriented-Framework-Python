@@ -72,4 +72,4 @@ class SoftMaxLayer(Layer):
         self.bias = self.bias - g * learning_rate
 
     def __str__(self):
-        return f"SM-{self.num_neurons}"
+        return f"SM{self.num_neurons}"

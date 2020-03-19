@@ -30,17 +30,19 @@ class ClassicLayer(Layer):
 
     def backward(self, gradient: np.array, learning_rate: float,
                  regularization_function: NormRegularizationFunction) -> np.array:
-        dz = self.activationFunction.calculate_gradient(self.last_output)
+        dz = self.activationFunction.calculate_gradient(self.last_activation_output)
         final_gradient = np.multiply(gradient, dz)
         bias_gradient = final_gradient + regularization_function.calculate_gradient_bias(self)
         weight_gradient = np.dot(final_gradient, self.last_input.T)
         weight_gradient += regularization_function.calculate_gradient_weights(self)
 
+        final_gradient = np.dot(self.weight.T, final_gradient)
+
         self.update_bias(learning_rate, bias_gradient)
         self.update_weight(learning_rate, weight_gradient)
 
         # FIXME check the expected value type: should be a np.array (check the case when we have single value)
-        return np.dot(self.weight.T, final_gradient)
+        return final_gradient
 
     def update_weight(self, learning_rate: float, grads: np.array):
         assert self.weight.shape == grads.shape
@@ -53,4 +55,4 @@ class ClassicLayer(Layer):
         self.bias = self.bias - g * learning_rate
 
     def __str__(self):
-        return f"{self.activationFunction}-{self.num_neurons}"
+        return f"{self.activationFunction}{self.num_neurons}"
