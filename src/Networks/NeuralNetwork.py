@@ -1,16 +1,16 @@
 import time
 from typing import List, Tuple
 
+import matplotlib.pyplot as plt
+
+from src.ActivationFunctions.ActivationFunction import *
 from src.BatchFunctions import BatchFunction
 from src.BatchFunctions.BatchFunction import BatchMode
 from src.CostFunctions import CostFunction
-from src.ActivationFunctions.ActivationFunction import *
-import matplotlib.pyplot as plt
-
-from src.Networks.Layer.Layer import Layer
+from src.Networks.Layer.ClassicLayer import ClassicLayer
 from src.Networks.SupervisedModel import SupervisedModel
-from src.Regularizations.NormRegularizationFunction import NormRegularizationFunction, L2WeightDecay
 from src.Regularizations.EarlyStoppingRegularization import StoppingCondition, VoidStoppingCondition
+from src.Regularizations.NormRegularizationFunction import NormRegularizationFunction, L2WeightDecay
 
 
 class NeuralNetwork(SupervisedModel):
@@ -24,8 +24,7 @@ class NeuralNetwork(SupervisedModel):
                  epochs: int = 1000,
                  stopping_condition: StoppingCondition = VoidStoppingCondition(),
                  output_activation_function: ActivationFunction = Sigmoid(),
-                 regularization_rate: float = 0.00,
-                 regularization_function: NormRegularizationFunction = L2WeightDecay()):
+                 regularization_function: NormRegularizationFunction = L2WeightDecay(0.01)):
         self.hidden_layers = []
         self.num_output = num_output
         self.num_inputs = num_inputs
@@ -33,7 +32,6 @@ class NeuralNetwork(SupervisedModel):
         self.learning_rate = learning_rate
         self.epochs = epochs
         self.stopping_condition = stopping_condition
-        self.regularization_rate = regularization_rate
         self.regularization_function = regularization_function
 
         for layer in hidden_architecture:
@@ -42,7 +40,7 @@ class NeuralNetwork(SupervisedModel):
 
     def __add_layer(self, num_neurons: int, activation_function: ActivationFunction):
         prev_num_neurons = self.__get_prev_num_neurons()
-        new_layer = Layer(num_neurons, prev_num_neurons, activation_function)
+        new_layer = ClassicLayer(num_neurons, prev_num_neurons, activation_function)
         self.hidden_layers.append(new_layer)
 
     def __get_prev_num_neurons(self) -> int:
@@ -70,16 +68,12 @@ class NeuralNetwork(SupervisedModel):
 
             for batch_input, batch_expected in batch_function.get_batch():
                 output = self.predict(batch_input)
-                # FIXME check the expected value type: should be a np.array (check the case when we have single value)
-                bias_grads, weight_grads = self.back_propagation(output, batch_expected)
-                self.update_biases(bias_grads, self.learning_rate)
-                self.update_weight(weight_grads, self.learning_rate)
+                self.back_propagation(output, batch_expected)
 
             if i % 1 == 0 and i != 0:
                 regularization_penalty = 0.0
                 for layer in self.hidden_layers:
-                    regularization_penalty += np.sum(self.regularization_rate \
-                                              * self.regularization_function.calculate(layer))
+                    regularization_penalty += np.sum(self.regularization_function.calculate(layer))
 
                 output = self.predict(input_data)
                 error = self.cost_function.calculate(output, expected_output) + regularization_penalty
@@ -104,32 +98,8 @@ class NeuralNetwork(SupervisedModel):
             x_input = layer.forward(x_input)
         return x_input
 
-    def back_propagation(self, result, expected) -> Tuple[List[np.array], List[np.array]]:
-        bias = []
-        weight = []
-
+    def back_propagation(self, result, expected):
         gradient = self.cost_function.calculate_gradient(result, expected)
-
         for layer in self.hidden_layers[::-1]:
-            z = layer.last_output
-            zz = layer.activationFunction.calculate(z)
+            gradient = layer.backward(gradient, self.learning_rate, self.regularization_function)
 
-            # element-wise multiplication
-            gradient = np.multiply(gradient, layer.activationFunction.calculate_gradient(zz))
-
-            bias.append(gradient
-                        + self.regularization_rate * self.regularization_function.calculate_gradient_bias(layer))
-            weight.append(np.dot(gradient, layer.last_input.T)
-                          + self.regularization_rate * self.regularization_function.calculate_gradient_weights(layer))
-
-            gradient = np.dot(layer.weight.T, gradient)
-
-        return bias, weight
-
-    def update_biases(self, bias_grads, learning_rate):
-        for i, layer in enumerate(self.hidden_layers[::-1]):
-            layer.update_bias(learning_rate, bias_grads[i])
-
-    def update_weight(self, weight_grads, learning_rate):
-        for i, layer in enumerate(self.hidden_layers[::-1]):
-            layer.update_weight(learning_rate, weight_grads[i])

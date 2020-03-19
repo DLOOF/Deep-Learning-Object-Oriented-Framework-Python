@@ -6,6 +6,9 @@ from src.Networks.Layer.Layer import Layer
 
 class NormRegularizationFunction(ABC):
 
+    def __init__(self, regularization_rate: float):
+        self.regularization_rate = regularization_rate
+
     @abstractmethod
     def calculate(self, layer: Layer) -> float:
         pass
@@ -32,10 +35,10 @@ class VoidNormRegularizationFunction(NormRegularizationFunction):
 
 class L2WeightDecay(NormRegularizationFunction):
     def calculate_gradient_weights(self, layer: Layer) -> np.array:
-        return layer.weight
+        return layer.weight * self.regularization_rate
 
     def calculate_gradient_bias(self, layer: Layer) -> np.array:
         return np.zeros(layer.bias.shape)
 
     def calculate(self, layer: Layer) -> float:
-        return np.dot(layer.weight.T, layer.weight) * 0.5
+        return np.dot(layer.weight.T, layer.weight) * 0.5 * self.regularization_rate
