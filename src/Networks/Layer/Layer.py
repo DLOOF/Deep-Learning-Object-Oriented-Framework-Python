@@ -10,6 +10,8 @@ class Layer(ABC):
     def __init__(self):
         self.last_input = None
         self.last_output = None
+        self.last_input_shape = None
+        self.last_activation_output = None
 
     @abstractmethod
     def forward(self, x_input: np.array) -> np.array:

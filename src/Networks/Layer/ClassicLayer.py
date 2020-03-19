@@ -1,5 +1,5 @@
 from src.ActivationFunctions.ActivationFunction import *
-from src.InitializationFunctions.InitializationFunction import Xavier, InitializationFunction
+from src.InitializationFunctions.InitializationFunction import *
 from src.Networks.Layer.Layer import Layer
 from src.Regularizations import NormRegularizationFunction
 
@@ -7,7 +7,7 @@ from src.Regularizations import NormRegularizationFunction
 class ClassicLayer(Layer):
 
     def __init__(self, num_neurons: int, prev_num_neurons: int, activation_function: ActivationFunction = Relu(),
-                 initialization_function: InitializationFunction = Xavier()):
+                 initialization_function: InitializationFunction = He()):
         super().__init__()
         self.initialization_function = initialization_function
         self.num_neurons = num_neurons
@@ -17,8 +17,9 @@ class ClassicLayer(Layer):
 
     def forward(self, x_input: np.array) -> np.array:
         self.last_input = x_input
-        self.last_output = self.activationFunction.calculate(np.dot(self.weight, x_input) + self.bias)
-        return self.last_output
+        self.last_output = np.dot(self.weight, x_input) + self.bias
+        self.last_activation_output = self.activationFunction.calculate(self.last_output)
+        return self.last_activation_output
 
     def backward(self, gradient: np.array, learning_rate: float,
                  regularization_function: NormRegularizationFunction) -> np.array:

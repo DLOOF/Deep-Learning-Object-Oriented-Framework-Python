@@ -27,7 +27,8 @@ class MaxPoolingLayer(Layer):
         for im_region, i, j in self.__iterate_regions__(x_input):
             output[i, j] = np.average(im_region, axis=(0, 1))
 
-        return output
+        self.last_output = output
+        return self.last_output
 
     def backward(self, gradient: np.array, learning_rate: float,
                  regularization_function: NormRegularizationFunction) -> np.array:

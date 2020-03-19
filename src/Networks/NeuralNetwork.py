@@ -76,7 +76,7 @@ class NeuralNetwork(SupervisedModel):
                     regularization_penalty += np.sum(self.regularization_function.calculate(layer))
 
                 output = self.predict(input_data)
-                output_real = np.argmax(output, axis=0) # only on classification, not on prediction
+                output_real = np.argmax(output, axis=0)  # only on classification, not on prediction
                 expected_real = np.argmax(expected_output, axis=0)
                 mae = np.absolute(output_real - expected_real).mean()
                 mse = np.power(output_real - expected_real, 2.0).mean()
@@ -108,4 +108,3 @@ class NeuralNetwork(SupervisedModel):
         gradient = self.cost_function.calculate_gradient(result, expected)
         for layer in self.hidden_layers[::-1]:
             gradient = layer.backward(gradient, self.learning_rate, self.regularization_function)
-

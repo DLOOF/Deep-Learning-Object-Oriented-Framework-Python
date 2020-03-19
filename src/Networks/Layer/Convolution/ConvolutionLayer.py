@@ -27,7 +27,8 @@ class ConvolutionLayer(Layer):
 
         for im_region, i, j in self.__iterate_regions__(x_input):
             output[i, j] = np.sum(im_region * self.filters, axis=(1, 2))
-        return output
+        self.last_activation_output = output
+        return self.last_activation_output
 
     def backward(self, gradient: np.array, learning_rate: float,
                  regularization_function: NormRegularizationFunction) -> np.array:
