@@ -4,6 +4,7 @@ from src.Regularizations import NormRegularizationFunction
 
 
 class ConvolutionLayer(Layer):
+    # FIXME: In this moment this class is a convolution filter 3x3
 
     def __init__(self, num_filters):
         super().__init__()
@@ -30,11 +31,14 @@ class ConvolutionLayer(Layer):
 
     def backward(self, gradient: np.array, learning_rate: float,
                  regularization_function: NormRegularizationFunction) -> np.array:
+
         final_gradient = np.zeros(self.filters.shape)
         for im_region, i, j in self.__iterate_regions__(self.last_input):
             for f in range(self.num_filters):
                 final_gradient[f] += gradient[i, j, f] * im_region
+
         self.update_weight(learning_rate, final_gradient)
+        # TODO check this gradient!
         return final_gradient
 
     def update_weight(self, learning_rate: float, grads: np.array):
