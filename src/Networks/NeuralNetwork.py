@@ -76,11 +76,17 @@ class NeuralNetwork(SupervisedModel):
                     regularization_penalty += np.sum(self.regularization_function.calculate(layer))
 
                 output = self.predict(input_data)
-                error = self.cost_function.calculate(output, expected_output) + regularization_penalty
-                iteration_outputs.append(error)
+                output_real = np.argmax(output, axis=0) # only on classification, not on prediction
+                expected_real = np.argmax(expected_output, axis=0)
+                mae = np.absolute(output_real - expected_real).mean()
+                mse = np.power(output_real - expected_real, 2.0).mean()
+                accuracy = np.sum(output_real == expected_real) / output_real.size
+                loss = self.cost_function.calculate(output, expected_output)
+
+                iteration_outputs.append(accuracy)
                 stept.append(i)
 
-                print("%d %.3f%%" % (i, error * 100.0))
+                print("%d - mae %.3f%% mse %.3f%% loss %.3f acc %.3f" % (i, mae, mse, loss, accuracy))
                 # print("Overall accuracy: %.3f%%" % (accuracy))
 
         toc = time.time()
