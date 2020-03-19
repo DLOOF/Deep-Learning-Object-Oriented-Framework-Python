@@ -1,5 +1,6 @@
 from typing import List, Tuple
 from src.ActivationFunctions.ActivationFunction import *
+from src.InitializationFunctions.InitializationFunction import Xavier, InitializationFunction
 
 
 class Layer:
@@ -12,14 +13,15 @@ class Layer:
 
     def __init__(self, num_neurons: int,
                  prev_num_neurons: int,
-                 activation_function: ActivationFunction = Relu()):
+                 activation_function: ActivationFunction = Relu(),
+                 initialization_function: InitializationFunction = Xavier()):
         self.last_input = None
         self.last_output = None
-
+        self.initialization_function = initialization_function
         self.num_neurons = num_neurons
         self.activationFunction = activation_function
-        self.weight = np.random.rand(prev_num_neurons, num_neurons).T
-        self.bias = np.random.rand(self.num_neurons, 1)
+        self.weight = initialization_function.initialize(prev_num_neurons, num_neurons).T
+        self.bias = initialization_function.initialize(self.num_neurons, 1)
 
     def forward(self, x_input: np.array) -> np.array:
         self.last_input = x_input
