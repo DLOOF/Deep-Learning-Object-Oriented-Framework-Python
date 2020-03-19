@@ -59,7 +59,7 @@ class MnistExample(ExampleTemplate):
         self.cost_function = MeanSquaredError()
 
     def define_training_hyperparameters(self):
-        self.learning_rate = 0.01
+        self.learning_rate = 0.2
         self.iterations = 100
         self.batch_function = MiniBatchNormalized(self.training_data, self.expected_output, 2000)
 
