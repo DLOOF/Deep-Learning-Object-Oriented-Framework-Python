@@ -47,3 +47,6 @@ class ConvolutionLayer(Layer):
 
     def update_bias(self, learning_rate: float, grads: np.array):
         pass
+
+    def __str__(self):
+        return f"sm-{self.num_neurons}"

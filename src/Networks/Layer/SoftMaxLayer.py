@@ -70,3 +70,6 @@ class SoftMaxLayer(Layer):
         g = np.sum(grads, axis=1, keepdims=True) / self.last_input.shape[1]
         assert self.bias.shape == g.shape
         self.bias = self.bias - g * learning_rate
+
+    def __str__(self):
+        return f"SM-{self.num_neurons}"

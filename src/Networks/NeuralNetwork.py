@@ -88,3 +88,10 @@ class NeuralNetwork(SupervisedModel):
         gradient = self.cost_function.calculate_gradient(result, expected)
         for layer in self.layers[::-1]:
             gradient = layer.backward(gradient, self.learning_rate, self.regularization_function)
+
+    def __str__(self):
+        string = ""
+        for layer in self.layers:
+            string += str(layer) + "-"
+        string += f"->{self.learning_rate}"
+        return string

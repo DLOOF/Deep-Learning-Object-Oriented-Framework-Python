@@ -25,13 +25,11 @@ class ExampleTemplate(ABC):
 
     def train_and_save_nn(self):
         self.neural_net.train(self.training_data, self.expected_output, self.batch_function)
-        with open(f'{self.experiment_name}-{len(self.architecture)}-.nn',
-                  'wb') as file:
+        with open(f'{self.neural_net}.nn', 'wb') as file:
             pickle.dump(self.neural_net, file)
 
     def load_net_from_file(self):
-        with open(f'{self.experiment_name}-{len(self.architecture)}-.nn',
-                  'rb') as file:
+        with open(f'{self.neural_net}.nn', 'rb') as file:
             self.neural_net = pickle.load(file)
 
     @staticmethod

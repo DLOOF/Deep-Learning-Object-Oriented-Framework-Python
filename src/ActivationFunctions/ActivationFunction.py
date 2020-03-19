@@ -26,6 +26,9 @@ class Relu(ActivationFunction):
     def calculate(self, value: np.array) -> np.array:
         return np.vectorize(lambda x: max(0.0, x))(value)
 
+    def __str__(self):
+        return "R"
+
 
 class Sigmoid(ActivationFunction):
 
@@ -35,6 +38,9 @@ class Sigmoid(ActivationFunction):
     def calculate(self, value: np.array) -> np.array:
         return 1 / (1 + np.exp(-value))
 
+    def __str__(self):
+        return "S"
+
 
 class TanH(ActivationFunction):
 
@@ -43,6 +49,9 @@ class TanH(ActivationFunction):
 
     def calculate(self, value: np.array) -> np.array:
         return np.tanh(value)
+
+    def __str__(self):
+        return "T"
 
 
 class SoftMax(ActivationFunction):

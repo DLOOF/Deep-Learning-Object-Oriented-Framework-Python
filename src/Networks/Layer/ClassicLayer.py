@@ -51,3 +51,6 @@ class ClassicLayer(Layer):
         g = np.sum(grads, axis=1, keepdims=True) / self.last_input.shape[1]
         assert self.bias.shape == g.shape
         self.bias = self.bias - g * learning_rate
+
+    def __str__(self):
+        return f"{self.activationFunction}-{self.num_neurons}"
