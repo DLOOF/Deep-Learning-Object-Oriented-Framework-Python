@@ -5,9 +5,9 @@ from src.CostFunctions import CostFunction
 from src.ActivationFunctions.ActivationFunction import *
 import matplotlib.pyplot as plt
 
-from src.Networks.Layer import Layer
+from src.Networks.Layer.Layer import Layer
 from src.Networks.SupervisedModel import SupervisedModel
-from src.Regularizations.NormRegularizationFunction import NormRegularizationFunction, VoidNormRegularizationFunction, L2WeightDecay
+from src.Regularizations.NormRegularizationFunction import NormRegularizationFunction, L2WeightDecay
 from src.Regularizations.EarlyStoppingRegularization import StoppingCondition, VoidStoppingCondition
 
 

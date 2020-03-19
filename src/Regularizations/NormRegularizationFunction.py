@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import numpy as np
 
-from src.Networks.Layer import Layer
+from src.Networks.Layer.Layer import Layer
 
 
 class NormRegularizationFunction(ABC):

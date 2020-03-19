@@ -1,8 +1,9 @@
 from typing import List, Tuple
+from src.Networks.Layer.Layer import Layer
 from src.ActivationFunctions.ActivationFunction import *
 
 
-class Layer:
+class ClassicLayer(Layer):
     # bias: np.array = None
     # weight: np.array = None
     # num_neurons: int = None
