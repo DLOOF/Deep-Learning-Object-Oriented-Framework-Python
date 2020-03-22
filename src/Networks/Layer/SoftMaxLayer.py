@@ -1,3 +1,5 @@
+import numpy as np
+
 from src.ActivationFunctions.ActivationFunction import *
 from src.InitializationFunctions.InitializationFunction import Xavier, InitializationFunction
 from src.Networks.Layer.Layer import Layer
@@ -6,22 +8,29 @@ from src.Regularizations import NormRegularizationFunction
 
 class SoftMaxLayer(Layer):
 
-    def __init__(self, num_neurons: int, prev_num_neurons: int, activation_function: ActivationFunction = SoftMax(),
+    def __init__(self, num_neurons: int, activation_function: ActivationFunction = SoftMax(),
                  initialization_function: InitializationFunction = Xavier()):
         super().__init__()
-        self.initialization_function = initialization_function
         self.num_neurons = num_neurons
         self.activationFunction = activation_function
-        self.weight = initialization_function.initialize(prev_num_neurons, num_neurons).T
+        self.initialization_function = initialization_function
         self.bias = initialization_function.initialize(self.num_neurons, 1)
 
+    def __init_weight_late__(self, x_input: np.array):
+        if self.weight is None:
+            prev_num_neurons = x_input.shape[0]
+            self.weight = self.initialization_function.initialize(prev_num_neurons, self.num_neurons).T
+
     def forward(self, x_input: np.array) -> np.array:
+
         self.last_input_shape = x_input.shape
 
         x_input = x_input.flatten()
-        self.last_input = x_input
 
-        self.last_output = np.dot(self.weight, x_input) + self.bias
+        self.last_input = x_input
+        self.__init_weight_late__(x_input)
+
+        self.last_output = (self.weight @ x_input).reshape(-1, 1) + self.bias
         self.last_activation_output = self.activationFunction.calculate(self.last_output)
         return self.last_activation_output
 
@@ -29,18 +38,15 @@ class SoftMaxLayer(Layer):
                  regularization_function: NormRegularizationFunction) -> np.array:
 
         for i, x_gradient in enumerate(gradient):
-            if gradient == 0:
-                continue
-
             # e^totals
             t_exp = np.exp(self.last_output)
 
             # Sum of all e^totals
-            S = np.sum(t_exp)
+            s = np.sum(t_exp)
 
             # Gradients of out[i] against totals
-            d_out_d_t = -t_exp[i] * t_exp / (S ** 2)
-            d_out_d_t[i] = t_exp[i] * (S - t_exp[i]) / (S ** 2)
+            d_out_d_t = -t_exp[i] * t_exp / (s ** 2)
+            d_out_d_t[i] = t_exp[i] * (s - t_exp[i]) / (s ** 2)
 
             # Gradients of totals against weights/biases/input
             d_t_d_w = self.last_input
@@ -48,12 +54,12 @@ class SoftMaxLayer(Layer):
             d_t_d_inputs = self.weight
 
             # Gradients of loss against totals
-            d_L_d_t = gradient * d_out_d_t
+            d_L_d_t = x_gradient * d_out_d_t
 
             # Gradients of loss against weights/biases/input
-            d_L_d_w = d_t_d_w[np.newaxis].T @ d_L_d_t[np.newaxis]
+            d_L_d_w = d_L_d_t @ d_t_d_w.reshape(1, -1)
             d_L_d_b = d_L_d_t * d_t_d_b
-            d_L_d_inputs = d_t_d_inputs @ d_L_d_t
+            d_L_d_inputs = d_t_d_inputs.T @ d_L_d_t
 
             # Update weights / biases
             self.update_weight(learning_rate, d_L_d_w)
@@ -63,13 +69,12 @@ class SoftMaxLayer(Layer):
 
     def update_weight(self, learning_rate: float, grads: np.array):
         assert self.weight.shape == grads.shape
-        self.weight = self.weight - grads * learning_rate / self.last_input.shape[1]
+        # TODO check this: self.weight = self.weight - grads * learning_rate / self.last_input.shape[1]
+        self.weight = self.weight - grads * learning_rate
 
     def update_bias(self, learning_rate: float, grads: np.array):
-        # takes the average gradient for each *batch* to be applied to the overall bias
-        g = np.sum(grads, axis=1, keepdims=True) / self.last_input.shape[1]
-        assert self.bias.shape == g.shape
-        self.bias = self.bias - g * learning_rate
+        assert self.bias.shape == grads.shape
+        self.bias = self.bias - grads * learning_rate
 
     def __str__(self):
         return f"SM{self.num_neurons}"

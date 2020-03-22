@@ -6,6 +6,9 @@ from src.BatchFunctions.BatchFunction import MiniBatchNormalized
 from src.CostFunctions.CostFunction import *
 from src.Examples.ExampleTemplate import ExampleTemplate
 from src.Networks.Layer.ClassicLayer import ClassicLayer, Sigmoid, TanH, Xavier
+from src.Networks.Layer.Convolution.AvgPoolingLayer import MaxPoolingLayer
+from src.Networks.Layer.Convolution.ConvolutionLayer import ConvolutionLayer
+from src.Networks.Layer.SoftMaxLayer import SoftMaxLayer
 
 
 class MnistExample(ExampleTemplate):
@@ -44,18 +47,18 @@ class MnistExample(ExampleTemplate):
     def define_architecture(self):
         self.architecture = []
 
-        layer_1 = ClassicLayer(784, TanH(), Xavier())
-        layer_2 = ClassicLayer(300, TanH(), Xavier())
-        layer_3 = ClassicLayer(300, TanH(), Xavier())
-        layer_4 = ClassicLayer(300, TanH(), Xavier())
-        layer_5 = ClassicLayer(300, TanH(), Xavier())
-        layer_6 = ClassicLayer(10, Sigmoid(), Xavier())
+        layer_1 = ConvolutionLayer(9)
+        layer_2 = MaxPoolingLayer()
+        # layer_3 = ClassicLayer(300, TanH(), Xavier())
+        # layer_4 = ClassicLayer(300, TanH(), Xavier())
+        # layer_5 = ClassicLayer(300, TanH(), Xavier())
+        layer_6 = SoftMaxLayer(10)
 
         self.architecture.append(layer_1)
         self.architecture.append(layer_2)
-        self.architecture.append(layer_3)
-        self.architecture.append(layer_4)
-        self.architecture.append(layer_5)
+        # self.architecture.append(layer_3)
+        # self.architecture.append(layer_4)
+        # self.architecture.append(layer_5)
         self.architecture.append(layer_6)
 
         self.cost_function = MeanSquaredError()
@@ -63,7 +66,7 @@ class MnistExample(ExampleTemplate):
     def define_training_hyperparameters(self):
         self.learning_rate = 0.2
         self.iterations = 7
-        self.batch_function = MiniBatchNormalized(self.training_data, self.expected_output, 200)
+        self.batch_function = MiniBatchNormalized(self.training_data, self.expected_output, 1)
 
     def run_tests(self):
         _, _, x_test, y_test = self.get_data()

@@ -20,6 +20,7 @@ class ConvolutionLayer(Layer):
                 yield im_region, i, j
 
     def forward(self, x_input: np.array) -> np.array:
+        x_input = x_input.reshape(28, 28)
         self.last_input = x_input
 
         h, w = x_input.shape

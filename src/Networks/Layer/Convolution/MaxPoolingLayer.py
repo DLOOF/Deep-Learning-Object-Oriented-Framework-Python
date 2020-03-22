@@ -6,6 +6,9 @@ from src.Regularizations import NormRegularizationFunction
 class MaxPoolingLayer(Layer):
     # FIXME: In this moment this class is a max polling of 2x2
 
+    def __init__(self):
+        super().__init__()
+
     @staticmethod
     def __iterate_regions__(image):
         h, w, _ = image.shape
