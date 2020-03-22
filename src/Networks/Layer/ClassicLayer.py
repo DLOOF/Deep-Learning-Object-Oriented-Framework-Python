@@ -18,7 +18,7 @@ class ClassicLayer(Layer):
         self.__init_weight_late__(x_input)
 
         self.last_input = x_input
-        self.last_output = np.dot(self.weight, x_input) + self.bias
+        self.last_output = (self.weight @ x_input) + self.bias
         self.last_activation_output = self.activationFunction.calculate(self.last_output)
 
         return self.last_activation_output
@@ -33,10 +33,10 @@ class ClassicLayer(Layer):
         dz = self.activationFunction.calculate_gradient(self.last_activation_output)
         final_gradient = np.multiply(gradient, dz)
         bias_gradient = final_gradient + regularization_function.calculate_gradient_bias(self)
-        weight_gradient = np.dot(final_gradient, self.last_input.T)
+        weight_gradient = final_gradient @ self.last_input.T
         weight_gradient += regularization_function.calculate_gradient_weights(self)
 
-        final_gradient = np.dot(self.weight.T, final_gradient)
+        final_gradient = self.weight.T @ final_gradient
 
         self.update_bias(learning_rate, bias_gradient)
         self.update_weight(learning_rate, weight_gradient)

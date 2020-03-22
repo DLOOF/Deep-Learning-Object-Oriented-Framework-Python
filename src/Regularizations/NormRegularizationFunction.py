@@ -42,4 +42,4 @@ class L2WeightDecay(NormRegularizationFunction):
         return np.zeros(layer.bias.shape)
 
     def calculate(self, layer: Layer) -> float:
-        return np.dot(layer.weight.T, layer.weight) * 0.5 * self.regularization_rate
+        return layer.weight.T @ layer.weight * (0.5 * self.regularization_rate)
