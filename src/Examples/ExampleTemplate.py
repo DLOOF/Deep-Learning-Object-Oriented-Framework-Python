@@ -29,7 +29,8 @@ class ExampleTemplate(ABC):
             pickle.dump(self.neural_net, file)
 
     def load_net_from_file(self):
-        with open(f'{self.neural_net}.nn', 'rb') as file:
+        # TODO: remote .nn2
+        with open(f'{self.neural_net}.nn2', 'rb') as file:
             self.neural_net = pickle.load(file)
 
     @staticmethod

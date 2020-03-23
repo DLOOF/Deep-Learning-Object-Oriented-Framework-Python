@@ -49,6 +49,11 @@ class NeuralNetwork(SupervisedModel):
                 output = self.predict(batch_input)
                 self.back_propagation(output, batch_expected)
 
+                output_real = np.argmax(output, axis=0)  # only on classification, not on prediction
+                expected_real = np.argmax(batch_expected, axis=0)
+                accuracy = np.sum(output_real == expected_real) / output_real.size
+                # print("acc: %.3f" % accuracy)
+
             if i % 1 == 0 and i != 0:
                 regularization_penalty = 0.0
                 for layer in self.layers:

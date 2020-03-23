@@ -6,7 +6,7 @@ from src.ActivationFunctions.ActivationFunction import SoftMax
 from src.BatchFunctions.BatchFunction import MiniBatchNormalized
 from src.CostFunctions.CostFunction import *
 from src.Examples.ExampleTemplate import ExampleTemplate
-from src.InitializationFunctions.InitializationFunction import He
+from src.InitializationFunctions.InitializationFunction import He, Random
 from src.Networks.Layer.ClassicLayer import ClassicLayer, Sigmoid, TanH, Xavier
 from src.Networks.Layer.Convolution.AvgPoolingLayer import MaxPoolingLayer
 from src.Networks.Layer.Convolution.ConvolutionLayer import ConvolutionLayer
@@ -53,18 +53,18 @@ class MnistExample(ExampleTemplate):
         # layer_2 = MaxPoolingLayer()
         # layer_0 = ClassicLayer(784)
         layer_3 = ClassicLayer(784, TanH(), Xavier())
-        # layer_4 = ClassicLayer(300, TanH(), Xavier())
+        layer_4 = ClassicLayer(300, TanH(), Xavier())
         # layer_5 = ClassicLayer(300, TanH(), Xavier())
-        layer_6 = ClassicLayer(10, SoftMax(), He())
+        layer_6 = ClassicLayer(10, Sigmoid(), Random())
 
         # self.architecture.append(layer_1)
         # self.architecture.append(layer_2)
         self.architecture.append(layer_3)
-        # self.architecture.append(layer_4)
+        self.architecture.append(layer_4)
         # self.architecture.append(layer_5)
         self.architecture.append(layer_6)
 
-        self.cost_function = MeanSquaredError()
+        self.cost_function = CrossEntropy()
 
     def define_training_hyperparameters(self):
         self.learning_rate = 0.2

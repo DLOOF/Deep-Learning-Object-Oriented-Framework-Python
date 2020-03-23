@@ -37,19 +37,19 @@ class RelationExample(ExampleTemplate):
         layer_1 = ClassicLayer(6, Relu(), Random())
         layer_2 = ClassicLayer(8, Relu(), Random())
         layer_3 = ClassicLayer(8, Relu(), Random())
-        layer_4 = ClassicLayer(2, SoftMax())
+        layer_4 = ClassicLayer(2, Sigmoid(), Random())
 
         self.architecture.append(layer_1)
         self.architecture.append(layer_2)
         self.architecture.append(layer_3)
         self.architecture.append(layer_4)
 
-        self.cost_function = MeanSquaredError()
+        self.cost_function = BinCrossEntropy()
 
     def define_training_hyperparameters(self):
-        self.learning_rate = 0.05
+        self.learning_rate = 0.001
         self.iterations = 1_500
-        self.batch_function = MiniBatch(self.training_data, self.expected_output, 5)
+        self.batch_function = MiniBatch(self.training_data, self.expected_output, 1)
 
     def run_tests(self):
         r = self.neural_net.predict(np.array([1, 1, 0, 0, 0, 0]).reshape(-1, 1)).T

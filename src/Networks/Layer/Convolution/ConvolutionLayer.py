@@ -7,6 +7,7 @@ class ConvolutionLayer(Layer):
     # FIXME: In this moment this class is a convolution filter 3x3
 
     def __init__(self, num_filters):
+        # TODO: get w of the image, get the h of the image, and the depth of the image. get the size of the kernel
         super().__init__()
         self.num_filters = num_filters
         self.filters = np.random.randn(num_filters, 3, 3) / 9

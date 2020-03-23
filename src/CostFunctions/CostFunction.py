@@ -3,8 +3,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 
-# TODO check this: https://stats.stackexchange.com/questions/154879/a-list-of-cost-functions-used-in-neural-networks
-#  -alongside-applications
+# TODO check this: https://stats.stackexchange.com/questions/154879/a-list-of-cost-functions-used-in-neural-networks-alongside-applications
 
 
 class CostFunction(ABC):
@@ -20,7 +19,7 @@ class CostFunction(ABC):
 
 class MeanAbsoluteError(CostFunction):
 
-    #FIXME
+    # FIXME
     def calculate(self, value: np.array, expected_value: np.array) -> np.array:
         return np.sum(np.absolute(value - expected_value))
 
@@ -32,7 +31,7 @@ class MeanSquaredError(CostFunction):
 
     def calculate(self, value: np.array, expected_value: np.array) -> np.array:
         sqr = value - expected_value
-        sqr = np.linalg.norm(sqr, 2)**2
+        sqr = np.linalg.norm(sqr, 2) ** 2
         sqr /= 2.0
         return sqr
 
@@ -43,11 +42,17 @@ class MeanSquaredError(CostFunction):
 class CrossEntropy(CostFunction):
 
     def calculate(self, value: np.array, expected_value: np.array) -> float:
-        # FIXME needs to be fixed this method has to return a scalar rather than a vector
-        # FIXME it depends whether if it is calculating for multiple classes instead of binary classes
-        assert value.ndim == expected_value.ndim and expected_value.ndim == 1
-        raise NotImplementedError("This method needs to be fixed")
-        return - (expected_value * np.log(value) + (1 - expected_value) * np.log(1 - value))
+        return - np.sum(expected_value * np.log(value))
 
     def calculate_gradient(self, value: np.array, expected_value: np.array) -> np.array:
-        return np.divide(value - expected_value, np.multiply(1 - value, value))
+        return - np.divide(expected_value, value) + np.divide(1 - value, 1 - expected_value)
+
+
+class BinCrossEntropy(CostFunction):
+
+    def calculate(self, value: np.array, expected_value: np.array) -> float:
+        sigma = 1e-2
+        return - np.mean(expected_value * np.log(value + sigma) + (1 - expected_value) * np.log((1 - value) + sigma))
+
+    def calculate_gradient(self, value: np.array, expected_value: np.array) -> np.array:
+        return - np.multiply((1 - value), expected_value) + value * (1 - expected_value)

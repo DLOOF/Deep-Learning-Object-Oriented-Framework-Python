@@ -36,7 +36,7 @@ class Relu(ActivationFunction):
 class Sigmoid(ActivationFunction):
 
     def calculate_gradient(self, value: np.array) -> np.array:
-        return self.calculate(value) * (1 - self.calculate(value))
+        return 1
 
     def calculate(self, value: np.array) -> np.array:
         return 1 / (1 + np.exp(-value))
