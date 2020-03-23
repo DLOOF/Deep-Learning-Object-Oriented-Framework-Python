@@ -9,6 +9,9 @@ import numpy as np
 
 class ActivationFunction(ABC):
 
+    def operation(self):
+        return np.multiply
+
     @abstractmethod
     def calculate(self, value: np.array) -> np.array:
         pass
@@ -56,10 +59,40 @@ class TanH(ActivationFunction):
 
 class SoftMax(ActivationFunction):
 
-    def calculate_gradient(self, value: np.array) -> np.array:
-        calculated_value = self.calculate(value)
-        return -np.outer(calculated_value, calculated_value) + np.diag(calculated_value.flatten())
+    def __init__(self):
+        self.last_output = None
+        self.last_input = None
 
-    def calculate(self, value: np.array) -> np.array:
-        e_value = np.exp(value - np.max(value))
-        return e_value / np.sum(e_value)
+    def operation(self):
+        return lambda x, y: np.einsum('ijk,ik->ij', x, y.T).T
+
+    def calculate_gradient(self, da: np.array) -> np.array:
+        # z, da shapes - (m, n)
+        z = self.last_input
+        m, n = z.T.shape
+        p = self.calculate(z.T)
+        # First we create for each example feature vector, it's outer product with itself
+        # ( p1^2  p1*p2  p1*p3 .... )
+        # ( p2*p1 p2^2   p2*p3 .... )
+        # ( ...                     )
+        tensor1 = np.einsum('ij,ik->ijk', p, p)  # (m, n, n)
+        # Second we need to create an (n,n) identity of the feature vector
+        # ( p1  0  0  ...  )
+        # ( 0   p2 0  ...  )
+        # ( ...            )
+        tensor2 = np.einsum('ij,jk->ijk', p, np.eye(n, n))  # (m, n, n)
+        # Then we need to subtract the first tensor from the second
+        # ( p1 - p1^2   -p1*p2   -p1*p3  ... )
+        # ( -p1*p2     p2 - p2^2   -p2*p3 ...)
+        # ( ...                              )
+        dSoftmax = tensor2 - tensor1
+        # Finally, we multiply the dSoftmax (da/dz) by da (dL/da) to get the gradient w.r.t. Z
+        # dz = np.einsum('ijk,ik->ij', dSoftmax, da.T)  # (m, n)
+        return dSoftmax
+
+    def calculate(self, z: np.array) -> np.array:
+        self.last_input = z
+        e = np.exp(z - np.max(z))
+        s = np.sum(e, axis=1, keepdims=True)
+        self.last_output = e / s
+        return self.last_output

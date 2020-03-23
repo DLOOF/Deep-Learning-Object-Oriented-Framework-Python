@@ -36,36 +36,7 @@ class SoftMaxLayer(Layer):
 
     def backward(self, gradient: np.array, learning_rate: float,
                  regularization_function: NormRegularizationFunction) -> np.array:
-
-        for i, x_gradient in enumerate(gradient):
-            # e^totals
-            t_exp = np.exp(self.last_output)
-
-            # Sum of all e^totals
-            s = np.sum(t_exp)
-
-            # Gradients of out[i] against totals
-            d_out_d_t = -t_exp[i] * t_exp / (s ** 2)
-            d_out_d_t[i] = t_exp[i] * (s - t_exp[i]) / (s ** 2)
-
-            # Gradients of totals against weights/biases/input
-            d_t_d_w = self.last_input
-            d_t_d_b = 1
-            d_t_d_inputs = self.weight
-
-            # Gradients of loss against totals
-            d_L_d_t = x_gradient * d_out_d_t
-
-            # Gradients of loss against weights/biases/input
-            d_L_d_w = d_L_d_t @ d_t_d_w.reshape(1, -1)
-            d_L_d_b = d_L_d_t * d_t_d_b
-            d_L_d_inputs = d_t_d_inputs.T @ d_L_d_t
-
-            # Update weights / biases
-            self.update_weight(learning_rate, d_L_d_w)
-            self.update_bias(learning_rate, d_L_d_b)
-
-            return d_L_d_inputs.reshape(self.last_input_shape)
+        pass
 
     def update_weight(self, learning_rate: float, grads: np.array):
         assert self.weight.shape == grads.shape

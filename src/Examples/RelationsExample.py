@@ -1,6 +1,8 @@
+from src.ActivationFunctions.ActivationFunction import SoftMax, Relu, TanH
 from src.BatchFunctions.BatchFunction import MiniBatch
 from src.CostFunctions.CostFunction import *
 from src.Examples.ExampleTemplate import ExampleTemplate
+from src.InitializationFunctions.InitializationFunction import He, Random
 from src.Networks.Layer.ClassicLayer import ClassicLayer, Sigmoid
 
 
@@ -32,10 +34,10 @@ class RelationExample(ExampleTemplate):
     def define_architecture(self):
         self.architecture = []
 
-        layer_1 = ClassicLayer(6)
-        layer_2 = ClassicLayer(8)
-        layer_3 = ClassicLayer(8)
-        layer_4 = ClassicLayer(2, Sigmoid())
+        layer_1 = ClassicLayer(6, Relu(), Random())
+        layer_2 = ClassicLayer(8, Relu(), Random())
+        layer_3 = ClassicLayer(8, Relu(), Random())
+        layer_4 = ClassicLayer(2, SoftMax())
 
         self.architecture.append(layer_1)
         self.architecture.append(layer_2)
@@ -47,7 +49,7 @@ class RelationExample(ExampleTemplate):
     def define_training_hyperparameters(self):
         self.learning_rate = 0.05
         self.iterations = 1_500
-        self.batch_function = MiniBatch(self.training_data, self.expected_output, 1)
+        self.batch_function = MiniBatch(self.training_data, self.expected_output, 5)
 
     def run_tests(self):
         r = self.neural_net.predict(np.array([1, 1, 0, 0, 0, 0]).reshape(-1, 1)).T
