@@ -12,10 +12,13 @@ SupervisedModel <|-- NeuralNetwork
 Layer <|-- ClassicLayer
 Layer <|-- ConvolutionLayer
 Layer <|-- PoolingLayer
+Layer <|-- Recurrent
 
 PoolingLayer <|-- MaxPooling
 PoolingLayer <|-- AvgPooling
 
+Recurrent <|-- LSTM
+Recurrent <|-- SimpleRNN
 
 
 Layer --> "1" InitializationFunction: initFunction >
@@ -69,6 +72,16 @@ BatchFunction <|-- BatchMode
 BatchFunction <|-- MiniBatch
 MiniBatch <|-- MiniBatchNormalized
 
+NeuralNetwork --> "1..*" Optimizer
+
+Optimizer <|-- AdaptiveLearningRate
+Optimizer <|-- StochasticGradientDescent
+AdaptiveLearningRate <|-- Adam
+AdaptiveLearningRate <|-- RMSProp
+AdaptiveLearningRate <|-- AdaGrad
+StochasticGradientDescent <|-- SGDMomentum
+StochasticGradientDescent <|-- SGDNesterovMomentum
+
 
 abstract class SupervisedModel {
       {abstract} + train(input: Vector, expectedOutput: Vector): void
@@ -110,6 +123,10 @@ abstract class Layer {
 class ClassicLayer
 class ConvolutionLayer
 class Dropout
+
+abstract class Recurrent
+class LSTM
+class SimpleRNN
 
 abstract class PoolingLayer
 class MaxPooling
@@ -155,5 +172,14 @@ class MiniBatch
 class MiniBatchNormalized {
       {static} - epsilon: float
 }
+
+abstract class Optimizer
+abstract class AdaptiveLearningRate
+class Adam
+class AdaGrad
+class RMSProp
+abstract class StochasticGradientDescent
+class StochasticGradientDescent
+
 
 @enduml
