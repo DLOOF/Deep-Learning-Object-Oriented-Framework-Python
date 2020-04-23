@@ -5,6 +5,71 @@ skinparam shadowing false
 ' hide footbox
 hide empty members
 
+
+SupervisedModel <|-- NeuralNetwork
+
+
+Layer <|-- ClassicLayer
+Layer <|-- ConvolutionLayer
+Layer <|-- PoolingLayer
+
+PoolingLayer <|-- MaxPooling
+PoolingLayer <|-- AvgPooling
+
+
+
+Layer --> "1" InitializationFunction: initFunction >
+
+
+
+InitializationFunction <|-- Random
+InitializationFunction <|-- He
+InitializationFunction <|-- Xavier
+InitializationFunction <|-- Other
+
+
+
+NeuralNetwork -- "1" CostFunction : costFunction >
+NeuralNetwork --> "*" Layer : hiddenLayers >
+
+Layer --> "1" ActivationFunction : activationFunction >
+
+
+CostFunction <|-- MeanAbsoluteError
+CostFunction <|-- MeanSquaredError
+CostFunction <|-- CrossEntropy
+CostFunction <|-- BinaryCrossEntropy
+
+ActivationFunction <|-- ReLU
+ActivationFunction <|-- Sigmoid
+ActivationFunction <|-- TanH
+ActivationFunction <|-- Softmax
+
+
+Layer <|-- Dropout
+
+SupervisedModel <|-- BaggingRegularization
+BaggingRegularization --> "1..*" SupervisedModel : models >
+
+
+
+NeuralNetwork --> "0..1" NormPenaltyRegularization: regularizationFunction >
+
+
+
+NormPenaltyRegularization <|-- L1WeightDecay
+NormPenaltyRegularization <|-- L2WeightDecay
+' CostFunction --> "0..1" NormPenaltyRegularization : regularizationFunction >
+
+
+
+NeuralNetwork --> "1" BatchFunction: batchFunction >
+
+BatchFunction <|-- BatchMode
+BatchFunction <|-- MiniBatch
+MiniBatch <|-- MiniBatchNormalized
+
+
 abstract class SupervisedModel {
       {abstract} + train(input: Vector, expectedOutput: Vector): void
       {abstract} + predict(input: Vector): Vector
@@ -21,7 +86,15 @@ class NeuralNetwork {
       + backprop(output, expected): Tuple[List[Matrix],List[Vector]]
 }
 
-SupervisedModel <|-- NeuralNetwork
+abstract class CostFunction {
+      {abstract} + calculate(value, expected_value): float
+      {abstract} + calculateGradient(value, expected_value): Vector
+}
+
+class MeanAbsoluteError
+class MeanSquaredError
+class CrossEntropy
+class BinaryCrossEntropy
 
 abstract class Layer {
       - bias: Vector
@@ -36,78 +109,31 @@ abstract class Layer {
 
 class ClassicLayer
 class ConvolutionLayer
+class Dropout
+
 abstract class PoolingLayer
-
-Layer <|-- ClassicLayer
-Layer <|-- ConvolutionLayer
-Layer <|-- PoolingLayer
-
 class MaxPooling
 class AvgPooling
 
-PoolingLayer <|-- MaxPooling
-PoolingLayer <|-- AvgPooling
-
-abstract class InitializationFunction {
-	 {abstract} + initialize(x: int, y: int): Matrix
-}
-
-ClassicLayer --> "1" InitializationFunction: initFunction >
-
-class Random
-class He
-class Xavier
-class Other
-
-InitializationFunction <|-- Random
-InitializationFunction <|-- He
-InitializationFunction <|-- Xavier
-InitializationFunction <|-- Other
-
-abstract class CostFunction {
-      {abstract} + calculate(value, expected_value): float
-      {abstract} + calculateGradient(value, expected_value): Vector
-}
 
 abstract class ActivationFunction {
       {abstract} + calculate(...): Vector
       {abstract} + calculateGradient(...): Vector
 }
 
-NeuralNetwork -- "1" CostFunction : costFunction >
-NeuralNetwork --> "*" Layer : hiddenLayers >
-' NeuralNetwork --> "1" Layer : outputLayer >
-
-ClassicLayer --> "1" ActivationFunction : activationFunction >
-
-
-CostFunction <|-- MeanAbsoluteError
-CostFunction <|-- MeanSquaredError
-CostFunction <|-- CrossEntropy
-
-ActivationFunction <|-- ReLU
-ActivationFunction <|-- Sigmoid
-ActivationFunction <|-- TanH
-ActivationFunction <|-- Softmax
-
-
-abstract class ActivationFunctionRegularizaton {
-	 + _(activationFunction: ActivationFunction)
-	 {abstract} + regularize(value: Vector): Vector
-	 {abstract} + regularizationGradient(value: Vector): Vector
+abstract class InitializationFunction {
+	 {abstract} + initialize(x: int, y: int): Matrix
 }
 
-class Dropout
+class Random
+class He
+class Xavier
+class Other
 
-ActivationFunction <|-- ActivationFunctionRegularizaton
-ActivationFunctionRegularizaton <|-- Dropout
 
 class BaggingRegularization {
       + _(models: List[SupervizedModels])
 }
-
-SupervisedModel <|-- BaggingRegularization
-BaggingRegularization --> "1..*" SupervisedModel : models >
 
 abstract class NormPenaltyRegularization {
 	 {abstract} + calculate(layer: Layer): float
@@ -115,14 +141,8 @@ abstract class NormPenaltyRegularization {
 	 {abstract} + calculateGradientBiase(layer: Layer): Vector
 }
 
-NeuralNetwork --> "0..1" NormPenaltyRegularization: regularizationFunction >
-
 class L1WeightDecay
 class L2WeightDecay
-
-NormPenaltyRegularization <|-- L1WeightDecay
-NormPenaltyRegularization <|-- L2WeightDecay
-' CostFunction --> "0..1" NormPenaltyRegularization : regularizationFunction >
 
 abstract class BatchFunction {
 	 {abstract} + _(input_data: Matrix, expected_output: Matrix): void
@@ -130,17 +150,10 @@ abstract class BatchFunction {
 }
 
 class BatchMode
-
 class MiniBatch
 
 class MiniBatchNormalized {
       {static} - epsilon: float
 }
-
-NeuralNetwork --> "1" BatchFunction: batchFunction >
-
-BatchFunction <|-- BatchMode
-BatchFunction <|-- MiniBatch
-MiniBatch <|-- MiniBatchNormalized
 
 @enduml
