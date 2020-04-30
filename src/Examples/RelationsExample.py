@@ -46,10 +46,10 @@ class RelationExample(ExampleTemplate):
         self.architecture.append(layer_4)
 
         self.cost_function = MeanSquaredError()
-        self.optimizer = RMSProp(0.5)
+        self.optimizer = RMSProp(0.1)
 
     def define_training_hyperparameters(self):
-        self.learning_rate = 0.05
+        self.learning_rate = 0.001
         self.iterations = 1_500
         self.batch_function = MiniBatch(self.training_data, self.expected_output, 5)
 

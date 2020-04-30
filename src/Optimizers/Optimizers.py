@@ -18,10 +18,14 @@ class Optimizer(ABC):
         pass
 
     def calculate_bias(self, grad, learning_rate):
-        return self._calculate(grad, learning_rate, self.r_bias)
+        val, r = self._calculate(grad, learning_rate, self.r_bias)
+        self.r_bias = r
+        return val
 
     def calculate_weight(self, grad, learning_rate):
-        return self._calculate(grad, learning_rate, self.r_weight)
+        val, r = self._calculate(grad, learning_rate, self.r_weight)
+        self.r_weight = r
+        return val
 
 
 class SGD(Optimizer):
@@ -33,7 +37,7 @@ class SGD(Optimizer):
         return SGD()
 
     def _calculate(self, grad, learning_rate, r):
-        return - grad * learning_rate
+        return - grad * learning_rate, []
 
 
 class AdaGrad(Optimizer):
@@ -52,7 +56,7 @@ class AdaGrad(Optimizer):
         else:
             r += grad_grad
         denominator = self.delta + np.sqrt(r)
-        return - np.multiply(np.divide(learning_rate, denominator), grad)
+        return - np.multiply(np.divide(learning_rate, denominator), grad), r
 
 
 class RMSProp(Optimizer):
@@ -72,4 +76,4 @@ class RMSProp(Optimizer):
         else:
             r = r * self.decay_rate + grad_grad
         denominator = self.delta + np.sqrt(r)
-        return - np.multiply(np.divide(learning_rate, denominator), grad)
+        return - np.multiply(np.divide(learning_rate, denominator), grad), r
