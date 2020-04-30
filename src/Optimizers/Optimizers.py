@@ -28,16 +28,30 @@ class Optimizer(ABC):
         return val
 
 
-class SGD(Optimizer):
+class SGDMomentum(Optimizer):
+
+    def __init__(self, momentum_rate=0.5, initial_velocity=0.5):
+        super().__init__()
+        self.momentum_rate = momentum_rate
+        self.initial_velocity = initial_velocity
+
+    def copy_instance(self):
+        return SGDMomentum(self.momentum_rate, self.initial_velocity)
+
+    def _calculate(self, grad, learning_rate, r):
+        if r is None:
+            r = self.initial_velocity
+        v = self.momentum_rate * r - learning_rate * grad
+        return v, v
+
+
+class SGD(SGDMomentum):
 
     def __init__(self):
         super(SGD, self).__init__()
 
     def copy_instance(self):
-        return SGD()
-
-    def _calculate(self, grad, learning_rate, r):
-        return - grad * learning_rate, []
+        return SGDMomentum(momentum_rate=0.0, initial_velocity=0.0)
 
 
 class AdaGrad(Optimizer):

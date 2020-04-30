@@ -4,7 +4,7 @@ from src.CostFunctions.CostFunction import *
 from src.Examples.ExampleTemplate import ExampleTemplate
 from src.InitializationFunctions.InitializationFunction import He, Random
 from src.Networks.Layer.ClassicLayer import ClassicLayer, Sigmoid
-from src.Optimizers.Optimizers import SGD, RMSProp, AdaGrad
+from src.Optimizers.Optimizers import SGD, SGDMomentum, RMSProp, AdaGrad
 
 
 class RelationExample(ExampleTemplate):
@@ -46,7 +46,7 @@ class RelationExample(ExampleTemplate):
         self.architecture.append(layer_4)
 
         self.cost_function = MeanSquaredError()
-        self.optimizer = RMSProp(0.1)
+        self.optimizer = SGDMomentum(momentum_rate=0.1, initial_velocity=0.9)
 
     def define_training_hyperparameters(self):
         self.learning_rate = 0.001
