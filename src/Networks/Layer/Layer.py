@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
+from src.Optimizers.Optimizers import Optimizer
 from src.Regularizations import NormRegularizationFunction
 
 
@@ -10,6 +11,7 @@ class Layer(ABC):
     def __init__(self):
         self.bias = None
         self.weight = None
+        self.optimizer = None
         self.last_input = None
         self.last_output = None
         self.last_input_shape = None
@@ -31,3 +33,6 @@ class Layer(ABC):
     @abstractmethod
     def update_bias(self, learning_rate: float, grads: np.array):
         pass
+
+    def add_optimizer(self, optimizer: Optimizer):
+        self.optimizer = optimizer

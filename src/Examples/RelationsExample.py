@@ -4,6 +4,7 @@ from src.CostFunctions.CostFunction import *
 from src.Examples.ExampleTemplate import ExampleTemplate
 from src.InitializationFunctions.InitializationFunction import He, Random
 from src.Networks.Layer.ClassicLayer import ClassicLayer, Sigmoid
+from src.Optimizers.Optimizers import SGD, RMSProp, AdaGrad
 
 
 class RelationExample(ExampleTemplate):
@@ -37,7 +38,7 @@ class RelationExample(ExampleTemplate):
         layer_1 = ClassicLayer(6, Relu(), Random())
         layer_2 = ClassicLayer(8, Relu(), Random())
         layer_3 = ClassicLayer(8, Relu(), Random())
-        layer_4 = ClassicLayer(2, SoftMax())
+        layer_4 = ClassicLayer(2, Sigmoid())
 
         self.architecture.append(layer_1)
         self.architecture.append(layer_2)
@@ -45,6 +46,7 @@ class RelationExample(ExampleTemplate):
         self.architecture.append(layer_4)
 
         self.cost_function = MeanSquaredError()
+        self.optimizer = RMSProp(0.5)
 
     def define_training_hyperparameters(self):
         self.learning_rate = 0.05
@@ -85,6 +87,6 @@ class RelationExample(ExampleTemplate):
 
 
 if __name__ == '__main__':
-    np.random.seed(0)
+    # np.random.seed(0)
     relation_example = RelationExample("relation_example")
     relation_example.run()

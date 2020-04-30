@@ -30,11 +30,16 @@ class ClassicLayer(Layer):
 
     def backward(self, gradient: np.array, learning_rate: float,
                  regularization_function: NormRegularizationFunction) -> np.array:
-        dz = self.activationFunction.calculate_gradient(self.last_activation_output)
-        final_gradient = self.activationFunction.operation()(dz, gradient)
+        dz = self.activationFunction.calculate_gradient(self.last_activation_output)  # [num_out]x[num_examples]
+        final_gradient = self.activationFunction.operation()(dz,
+                                                             gradient)  # [num_out]x[num_examples] @ [num_out]x[num_examples]
+
         bias_gradient = final_gradient + regularization_function.calculate_gradient_bias(self)
+        bias_gradient = np.sum(bias_gradient, axis=1, keepdims=True) / self.last_input.shape[1]
+
         weight_gradient = final_gradient @ self.last_input.T
         weight_gradient += regularization_function.calculate_gradient_weights(self)
+        weight_gradient /= self.last_input.shape[1]
 
         final_gradient = self.weight.T @ final_gradient
 
@@ -46,13 +51,12 @@ class ClassicLayer(Layer):
 
     def update_weight(self, learning_rate: float, grads: np.array):
         assert self.weight.shape == grads.shape
-        self.weight = self.weight - grads * learning_rate / self.last_input.shape[1]
+        self.weight = self.weight + self.optimizer.calculate_weight(grads, learning_rate)
 
     def update_bias(self, learning_rate: float, grads: np.array):
         # takes the average gradient for each *batch* to be applied to the overall bias
-        g = np.sum(grads, axis=1, keepdims=True) / self.last_input.shape[1]
-        assert self.bias.shape == g.shape
-        self.bias = self.bias - g * learning_rate
+        assert self.bias.shape == grads.shape
+        self.bias = self.bias + self.optimizer.calculate_bias(grads, learning_rate)
 
     def __str__(self):
         return f"{self.activationFunction}{self.num_neurons}"

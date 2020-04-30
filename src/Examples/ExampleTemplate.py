@@ -17,11 +17,16 @@ class ExampleTemplate(ABC):
         self.cost_function = None
         self.neural_net = None
         self.iterations = None
+        self.optimizer = None
         self.architecture = []
         self.batch_function: BatchFunction = None
 
     def build_neuronal_net(self):
-        self.neural_net = NeuralNetwork(self.architecture, self.cost_function, self.learning_rate, self.iterations)
+        self.neural_net = NeuralNetwork(self.architecture,
+                                        self.cost_function,
+                                        self.learning_rate,
+                                        self.iterations,
+                                        optimizer=self.optimizer)
 
     def train_and_save_nn(self):
         self.neural_net.train(self.training_data, self.expected_output, self.batch_function)

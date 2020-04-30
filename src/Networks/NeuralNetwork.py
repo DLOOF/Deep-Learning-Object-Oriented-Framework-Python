@@ -1,13 +1,12 @@
 import time
-from typing import List
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 from src.BatchFunctions.BatchFunction import BatchMode, BatchFunction
 from src.CostFunctions import CostFunction
-from src.Networks.Layer import Layer
 from src.Networks.SupervisedModel import SupervisedModel
+from src.Optimizers.Optimizers import Optimizer, SGD
 from src.Regularizations.EarlyStoppingRegularization import StoppingCondition, VoidStoppingCondition
 from src.Regularizations.NormRegularizationFunction import NormRegularizationFunction, L2WeightDecay
 
@@ -20,7 +19,8 @@ class NeuralNetwork(SupervisedModel):
                  learning_rate: float = 0.001,
                  epochs: int = 1000,
                  stopping_condition: StoppingCondition = VoidStoppingCondition(),
-                 regularization_function: NormRegularizationFunction = L2WeightDecay(0.01)):
+                 regularization_function: NormRegularizationFunction = L2WeightDecay(0.01),
+                 optimizer: Optimizer = SGD()):
 
         self.layers = layers
         self.cost_function = cost_function
@@ -28,6 +28,12 @@ class NeuralNetwork(SupervisedModel):
         self.epochs = epochs
         self.stopping_condition = stopping_condition
         self.regularization_function = regularization_function
+        self.optimizer = optimizer
+        self.__add_optimizer()
+
+    def __add_optimizer(self):
+        for layer in self.layers:
+            layer.add_optimizer(self.optimizer.copy_instance())
 
     def train(self, input_data: np.array, expected_output: np.array, batch_function: BatchFunction = None):
         print("Starting training!")
@@ -84,7 +90,7 @@ class NeuralNetwork(SupervisedModel):
         return x_input
 
     def back_propagation(self, result, expected):
-        gradient = self.cost_function.calculate_gradient(result, expected)
+        gradient = self.cost_function.calculate_gradient(result, expected)  # [num_out]x[num_examples]
         for layer in self.layers[::-1]:
             gradient = layer.backward(gradient, self.learning_rate, self.regularization_function)
 
