@@ -95,11 +95,10 @@ class RMSProp(Optimizer):
 
 class Adam(Optimizer):
     def copy_instance(self):
-        return Adam(self.step_size, self.p1, self.p2, self.delta)
+        return Adam(self.p1, self.p2, self.delta)
 
-    def __init__(self, step_size=0.001, p1=0.9, p2=0.999, delta=1e-8):
+    def __init__(self, p1=0.9, p2=0.999, delta=1e-8):
         super().__init__()
-        self.step_size = step_size
         self.p1 = p1
         self.p2 = p2
         self.delta = delta
