@@ -72,16 +72,6 @@ BatchFunction <|-- BatchMode
 BatchFunction <|-- MiniBatch
 MiniBatch <|-- MiniBatchNormalized
 
-NeuralNetwork --> "1..*" Optimizer
-
-Optimizer <|-- AdaptiveLearningRate
-Optimizer <|-- StochasticGradientDescent
-AdaptiveLearningRate <|-- Adam
-AdaptiveLearningRate <|-- RMSProp
-AdaptiveLearningRate <|-- AdaGrad
-StochasticGradientDescent <|-- SGDMomentum
-StochasticGradientDescent <|-- SGDNesterovMomentum
-
 
 abstract class SupervisedModel {
       {abstract} + train(input: Vector, expectedOutput: Vector): void
@@ -174,12 +164,16 @@ class MiniBatchNormalized {
 }
 
 abstract class Optimizer
-abstract class AdaptiveLearningRate
 class Adam
 class AdaGrad
 class RMSProp
-abstract class StochasticGradientDescent
-class StochasticGradientDescent
 
+NeuralNetwork --> "1" Optimizer
+
+Optimizer <|-- Adam
+Optimizer <|-- RMSProp
+Optimizer <|-- AdaGrad
+Optimizer <|-- SGD
+Optimizer <|-- SGDMomentum
 
 @enduml
