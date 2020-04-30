@@ -91,3 +91,28 @@ class RMSProp(Optimizer):
             r = r * self.decay_rate + grad_grad
         denominator = self.delta + np.sqrt(r)
         return - np.multiply(np.divide(learning_rate, denominator), grad), r
+
+
+class Adam(Optimizer):
+    def copy_instance(self):
+        return Adam(self.step_size, self.p1, self.p2, self.delta)
+
+    def __init__(self, step_size=0.001, p1=0.9, p2=0.999, delta=1e-8):
+        super().__init__()
+        self.step_size = step_size
+        self.p1 = p1
+        self.p2 = p2
+        self.delta = delta
+
+    def _calculate(self, grad, learning_rate, params):
+        if params is None:
+            params = [0, np.zeros(grad.shape), np.zeros(grad.shape)]
+        t, s, r = params
+        t += 1
+        s = self.p1 * s + (1.0 - self.p1) * grad
+        r = self.p2 * r + (1.0 - self.p2) * np.multiply(grad, grad)
+
+        s_hat = np.divide(s, 1.0 - self.p1 ** t)
+        r_hat = np.divide(r, 1.0 - self.p2 ** t)
+
+        return - learning_rate * np.divide(s_hat, np.sqrt(r_hat) + self.delta), [t, s, r]
