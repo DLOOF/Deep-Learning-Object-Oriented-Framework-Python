@@ -11,6 +11,7 @@ from src.Networks.Layer.Convolution.Convolution2DLayer import Convolution2DLayer
 from src.Networks.Layer.Convolution.FlattenLayer import FlattenLayer
 from src.Networks.Layer.Convolution.MaxPoolingLayer import MaxPoolingLayer
 from src.Networks.Layer.Convolution.UnFlattenLayer import UnFlattenLayer
+from src.Optimizers.Optimizers import Adam
 
 
 class MnistExample(ExampleTemplate):
@@ -71,8 +72,9 @@ class MnistExample(ExampleTemplate):
 
     def define_training_hyperparameters(self):
         self.learning_rate = 0.2
-        self.iterations = 7
-        self.batch_function = MiniBatchNormalized(self.training_data, self.expected_output, 200)
+        self.iterations = 2
+        self.batch_function = MiniBatchNormalized(self.training_data, self.expected_output, 100)
+        self.optimizer = Adam()
 
     def run_tests(self):
         _, _, x_test, y_test = self.get_data()

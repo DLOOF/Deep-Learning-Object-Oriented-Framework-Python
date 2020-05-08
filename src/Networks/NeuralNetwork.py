@@ -51,28 +51,27 @@ class NeuralNetwork(SupervisedModel):
                 print("Stopping model training early")
                 break
 
-            for batch_input, batch_expected in batch_function.get_batch():
+            for j, (batch_input, batch_expected) in enumerate(batch_function.get_batch()):
                 output = self.predict(batch_input)
                 self.back_propagation(output, batch_expected)
 
-            if i % 1 == 0 and i != 0:
-                regularization_penalty = 0.0
-                for layer in self.layers:
-                    regularization_penalty += np.sum(self.regularization_function.calculate(layer))
+                if j % 1 == 0 and j != 0:
+                    # regularization_penalty = 0.0
+                    # for layer in self.layers:
+                    #     regularization_penalty += np.sum(self.regularization_function.calculate(layer))
+                    output = self.predict(batch_input)
+                    output_real = np.argmax(output, axis=1)  # only on classification, not on prediction
+                    expected_real = np.argmax(batch_expected, axis=1)
+                    mae = np.absolute(output_real - expected_real).mean()
+                    mse = np.power(output_real - expected_real, 2.0).mean()
+                    accuracy = np.sum(output_real == expected_real) / output_real.size
+                    # loss = self.cost_function.calculate(output, expected_output)
 
-                output = self.predict(input_data)
-                output_real = np.argmax(output, axis=1)  # only on classification, not on prediction
-                expected_real = np.argmax(expected_output, axis=1)
-                mae = np.absolute(output_real - expected_real).mean()
-                mse = np.power(output_real - expected_real, 2.0).mean()
-                accuracy = np.sum(output_real == expected_real) / output_real.size
-                loss = self.cost_function.calculate(output, expected_output)
+                    iteration_outputs.append(accuracy)
+                    stept.append(j)
 
-                iteration_outputs.append(accuracy)
-                stept.append(i)
-
-                print("%d - mae %.3f%% mse %.3f%% loss %.3f acc %.3f" % (i, mae, mse, loss, accuracy))
-                # print("Overall accuracy: %.3f%%" % (accuracy))
+                    print("%d - mae %.3f%% mse %.3f%% loss %.3f acc %.3f" % (i, mae, mse, 0, accuracy))
+                    # print("Overall accuracy: %.3f%%" % (accuracy))
 
         toc = time.time()
         fig, ax = plt.subplots()

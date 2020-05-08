@@ -41,16 +41,17 @@ class Convolution2DLayer(Layer):
                  regularization_function: NormRegularizationFunction) -> np.array:
 
         final_gradient = np.zeros(self.filters.shape)
-        for im_region, i, j in self.__iterate_regions__(self.last_input):
-            for f in range(self.channels):
-                final_gradient[f] += gradient[i, j, f] * im_region
+        for ex in self.last_input:
+            for im_region, i, j in self.__iterate_regions__(ex):
+                for f in range(self.channels):
+                    final_gradient[f] += gradient[i, j, f] * im_region
 
         self.update_weight(learning_rate, final_gradient)
         # TODO check this gradient!
         return final_gradient
 
     def update_weight(self, learning_rate: float, grads: np.array):
-        self.filters -= learning_rate * grads
+        self.filters += self.optimizer.calculate_weight(grads, learning_rate)
 
     def update_bias(self, learning_rate: float, grads: np.array):
         pass

@@ -40,6 +40,7 @@ class MaxPoolingLayer(Layer):
     def backward(self, gradient: np.array, learning_rate: float,
                  regularization_function: NormRegularizationFunction) -> np.array:
 
+        gradient.reshape(self.last_output.shape[:-1])
         final_gradient = np.zeros(self.last_input.shape)
         for ex in self.last_input:
             for im_region, i, j in self.__iterate_regions__(ex):
