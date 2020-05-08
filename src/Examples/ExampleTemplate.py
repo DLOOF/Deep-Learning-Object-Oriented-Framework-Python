@@ -5,6 +5,7 @@ import numpy as np
 
 from src.BatchFunctions import BatchFunction
 from src.Networks.NeuralNetwork import NeuralNetwork
+from src.Optimizers.Optimizers import SGD
 
 
 class ExampleTemplate(ABC):
@@ -17,7 +18,7 @@ class ExampleTemplate(ABC):
         self.cost_function = None
         self.neural_net = None
         self.iterations = None
-        self.optimizer = None
+        self.optimizer = SGD()
         self.architecture = []
         self.batch_function: BatchFunction = None
 

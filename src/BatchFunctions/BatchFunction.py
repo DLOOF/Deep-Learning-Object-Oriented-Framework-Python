@@ -38,15 +38,14 @@ class MiniBatch(BatchFunction):
         self.batch_size = batch_size
 
     def get_batch(self) -> Tuple[np.array, np.array]:
-        n = self.input_data.shape[1]
+        examples, output_size = self.input_data.shape
 
-        joined = np.vstack((self.input_data, self.expected_output)).T
+        joined = np.hstack((self.input_data, self.expected_output))
         np.random.shuffle(joined)
-        joined = joined.T
 
         # TODO: let the batch size be for any size, now is requiring that is a divisor of n
-        for batch in np.hsplit(joined, n / self.batch_size):
-            input_batch, output_batch = np.vsplit(batch, [self.input_data.shape[0]])
+        for batch in np.vsplit(joined, examples / self.batch_size):
+            input_batch, output_batch = np.hsplit(batch, [output_size])
             yield input_batch, output_batch
 
 
@@ -58,8 +57,8 @@ class MiniBatchNormalized(MiniBatch):
 
     def get_batch(self) -> Tuple[np.array, np.array]:
         for batch_data, batch_expected in super(MiniBatchNormalized, self).get_batch():
-            batch_mean = np.mean(batch_data, axis=1).reshape((batch_data.shape[0], 1))
-            batch_variance = np.var(batch_data, axis=1).reshape((batch_data.shape[0], 1))
+            batch_mean = np.atleast_2d(np.mean(batch_data, axis=0))
+            batch_variance = np.atleast_2d(np.var(batch_data, axis=0))
             batch_data_normalized = batch_data - np.broadcast_to(batch_mean, batch_data.shape)
             batch_data_normalized = np.divide(batch_data_normalized, np.sqrt(batch_variance + MiniBatchNormalized.epsilon))
 

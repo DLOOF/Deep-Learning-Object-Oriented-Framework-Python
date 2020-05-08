@@ -12,7 +12,7 @@ class UnFlattenLayer(Layer):
         self.height = height
 
     def forward(self, x_input: np.array) -> np.array:
-        return x_input.reshape(self.width, self.height, -1)
+        return x_input.reshape(-1, self.width, self.height)
 
     def backward(self, gradient: np.array, learning_rate: float,
                  regularization_function: NormRegularizationFunction) -> np.array:

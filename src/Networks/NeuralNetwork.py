@@ -61,8 +61,8 @@ class NeuralNetwork(SupervisedModel):
                     regularization_penalty += np.sum(self.regularization_function.calculate(layer))
 
                 output = self.predict(input_data)
-                output_real = np.argmax(output, axis=0)  # only on classification, not on prediction
-                expected_real = np.argmax(expected_output, axis=0)
+                output_real = np.argmax(output, axis=1)  # only on classification, not on prediction
+                expected_real = np.argmax(expected_output, axis=1)
                 mae = np.absolute(output_real - expected_real).mean()
                 mse = np.power(output_real - expected_real, 2.0).mean()
                 accuracy = np.sum(output_real == expected_real) / output_real.size

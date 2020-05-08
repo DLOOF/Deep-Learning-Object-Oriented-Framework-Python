@@ -2,22 +2,22 @@ from functools import lru_cache
 
 from mnist import MNIST
 
-from src.ActivationFunctions.ActivationFunction import SoftMax
+from src.ActivationFunctions.ActivationFunction import Sigmoid, TanH
 from src.BatchFunctions.BatchFunction import MiniBatchNormalized
 from src.CostFunctions.CostFunction import *
 from src.Examples.ExampleTemplate import ExampleTemplate
-from src.InitializationFunctions.InitializationFunction import He
-from src.Networks.Layer.ClassicLayer import ClassicLayer, Sigmoid, TanH, Xavier
-from src.Networks.Layer.Convolution.AvgPoolingLayer import MaxPoolingLayer
-from src.Networks.Layer.Convolution.ConvolutionLayer import ConvolutionLayer
-from src.Networks.Layer.SoftMaxLayer import SoftMaxLayer
+from src.Networks.Layer.ClassicLayer import ClassicLayer, Xavier
+from src.Networks.Layer.Convolution.Convolution2DLayer import Convolution2DLayer
+from src.Networks.Layer.Convolution.FlattenLayer import FlattenLayer
+from src.Networks.Layer.Convolution.MaxPoolingLayer import MaxPoolingLayer
+from src.Networks.Layer.Convolution.UnFlattenLayer import UnFlattenLayer
 
 
 class MnistExample(ExampleTemplate):
 
     def __encode_to_one_hot_vector(self, value: np.array):
         output = value.astype(int)
-        tmp = np.zeros((output.size, output.max() +1))
+        tmp = np.zeros((output.size, output.max() + 1))
         tmp[np.arange(output.size), output] = 1
 
         return tmp
@@ -33,7 +33,6 @@ class MnistExample(ExampleTemplate):
         x_test = np.asarray(x_test).astype(np.float32)
         y_test = self.__encode_to_one_hot_vector(np.asarray(y_test).astype(np.int32))
 
-
         # print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
         # print(x_train, y_train, x_test, y_test)
 
@@ -43,26 +42,30 @@ class MnistExample(ExampleTemplate):
 
     def define_data(self):
         x_train, y_train, x_test, y_test = self.get_data()
-        self.training_data = x_train.T
-        self.expected_output = y_train.T
+        self.training_data = x_train
+        self.expected_output = y_train
 
     def define_architecture(self):
         self.architecture = []
 
-        # layer_1 = ConvolutionLayer(9)
-        # layer_2 = MaxPoolingLayer()
-        # layer_0 = ClassicLayer(784)
-        layer_3 = ClassicLayer(784, TanH(), Xavier())
-        # layer_4 = ClassicLayer(300, TanH(), Xavier())
-        # layer_5 = ClassicLayer(300, TanH(), Xavier())
-        layer_6 = ClassicLayer(10, SoftMax(), He())
+        layer_0 = UnFlattenLayer(28, 28)
+        layer_1 = Convolution2DLayer(1)
+        layer_2 = MaxPoolingLayer()
+        layer_3 = FlattenLayer()
 
-        # self.architecture.append(layer_1)
-        # self.architecture.append(layer_2)
+        # layer_0 = ClassicLayer(784)
+        # layer_1 = ClassicLayer(784, TanH(), Xavier())
+        # layer_2 = ClassicLayer(300, TanH(), Xavier())
+        # layer_5 = ClassicLayer(300, TanH(), Xavier())
+        output = ClassicLayer(10, Sigmoid(), Xavier())
+
+        self.architecture.append(layer_0)
+        self.architecture.append(layer_1)
+        self.architecture.append(layer_2)
         self.architecture.append(layer_3)
         # self.architecture.append(layer_4)
         # self.architecture.append(layer_5)
-        self.architecture.append(layer_6)
+        self.architecture.append(output)
 
         self.cost_function = MeanSquaredError()
 

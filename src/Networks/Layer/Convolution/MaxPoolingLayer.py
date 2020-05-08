@@ -41,16 +41,16 @@ class MaxPoolingLayer(Layer):
                  regularization_function: NormRegularizationFunction) -> np.array:
 
         final_gradient = np.zeros(self.last_input.shape)
-
-        for im_region, i, j in self.__iterate_regions__(self.last_input):
-            h, w, f = im_region.shape
-            a_max = np.amax(im_region, axis=(0, 1))
-            for i2 in range(h):
-                for j2 in range(w):
-                    for f2 in range(f):
-                        # If this pixel was the max value, copy the gradient to it.
-                        if im_region[i2, j2, f2] == a_max[f2]:
-                            final_gradient[i * 2 + i2, j * 2 + j2, f2] = gradient[i, j, f2]
+        for ex in self.last_input:
+            for im_region, i, j in self.__iterate_regions__(ex):
+                h, w, f = im_region.shape
+                a_max = np.amax(im_region, axis=(0, 1))
+                for i2 in range(h):
+                    for j2 in range(w):
+                        for f2 in range(f):
+                            # If this pixel was the max value, copy the gradient to it.
+                            if im_region[i2, j2, f2] == a_max[f2]:
+                                final_gradient[i * 2 + i2, j * 2 + j2, f2] = gradient[i, j, f2]
 
         return final_gradient
 

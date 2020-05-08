@@ -12,36 +12,35 @@ class ClassicLayer(Layer):
         self.num_neurons = num_neurons
         self.activationFunction = activation_function
         self.initialization_function = initialization_function
-        self.bias = initialization_function.initialize(self.num_neurons, 1)
+        self.bias = initialization_function.initialize(1, self.num_neurons)
 
     def forward(self, x_input: np.array) -> np.array:
         self.__init_weight_late__(x_input)
 
         self.last_input = x_input
-        self.last_output = (self.weight @ x_input) + self.bias
+        self.last_output = (x_input @ self.weight) + self.bias
         self.last_activation_output = self.activationFunction.calculate(self.last_output)
 
         return self.last_activation_output
 
     def __init_weight_late__(self, x_input: np.array):
         if self.weight is None:
-            prev_num_neurons, _ = x_input.shape
-            self.weight = self.initialization_function.initialize(prev_num_neurons, self.num_neurons).T
+            _, prev_num_neurons = x_input.shape
+            self.weight = self.initialization_function.initialize(prev_num_neurons, self.num_neurons)
 
     def backward(self, gradient: np.array, learning_rate: float,
                  regularization_function: NormRegularizationFunction) -> np.array:
-        dz = self.activationFunction.calculate_gradient(self.last_activation_output)  # [num_out]x[num_examples]
-        final_gradient = self.activationFunction.operation()(dz,
-                                                             gradient)  # [num_out]x[num_examples] @ [num_out]x[num_examples]
+        dz = self.activationFunction.calculate_gradient(self.last_activation_output)
+        final_gradient = self.activationFunction.operation()(dz, gradient)
 
         bias_gradient = final_gradient + regularization_function.calculate_gradient_bias(self)
-        bias_gradient = np.sum(bias_gradient, axis=1, keepdims=True) / self.last_input.shape[1]
+        bias_gradient = np.sum(bias_gradient, axis=0, keepdims=True) / self.last_input.shape[0]
 
-        weight_gradient = final_gradient @ self.last_input.T
+        weight_gradient = self.last_input.T @ final_gradient
         weight_gradient += regularization_function.calculate_gradient_weights(self)
-        weight_gradient /= self.last_input.shape[1]
+        weight_gradient /= self.last_input.shape[0]
 
-        final_gradient = self.weight.T @ final_gradient
+        final_gradient = final_gradient @ self.weight.T
 
         self.update_bias(learning_rate, bias_gradient)
         self.update_weight(learning_rate, weight_gradient)
