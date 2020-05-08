@@ -3,7 +3,7 @@ from src.Networks.Layer.Layer import Layer
 from src.Regularizations import NormRegularizationFunction
 
 
-class MaxPoolingLayer(Layer):
+class AvgPoolingLayer(Layer):
     # FIXME: In this moment this class is a max polling of 2x2
 
     @staticmethod

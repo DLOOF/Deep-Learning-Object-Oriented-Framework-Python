@@ -3,13 +3,13 @@ from src.Networks.Layer.Layer import Layer
 from src.Regularizations import NormRegularizationFunction
 
 
-class ConvolutionLayer(Layer):
+class Convolution2DLayer(Layer):
     # FIXME: In this moment this class is a convolution filter 3x3
 
-    def __init__(self, num_filters):
+    def __init__(self, channels, filter_size=3):
         super().__init__()
-        self.num_filters = num_filters
-        self.filters = np.random.randn(num_filters, 3, 3) / 9
+        self.channels = channels
+        self.filters = np.random.randn(channels, filter_size, filter_size) / 9
 
     @staticmethod
     def __iterate_regions__(image):
@@ -20,15 +20,21 @@ class ConvolutionLayer(Layer):
                 yield im_region, i, j
 
     def forward(self, x_input: np.array) -> np.array:
-        x_input = x_input.reshape(28, 28)
+        assert x_input.ndim >= 2
+
         self.last_input = x_input
 
-        h, w = x_input.shape
-        output = np.zeros((h - 2, w - 2, self.num_filters))
+        output = []
+        for ex in x_input:
+            h, w = ex.shape
 
-        for im_region, i, j in self.__iterate_regions__(x_input):
-            output[i, j] = np.sum(im_region * self.filters, axis=(1, 2))
-        self.last_activation_output = output
+            convolution = np.zeros((h - 2, w - 2, self.channels))
+            for im_region, i, j in self.__iterate_regions__(ex):
+                convolution[i, j] = np.sum(im_region * self.filters)
+
+            output.append(convolution)
+
+        self.last_activation_output = np.array(output)
         return self.last_activation_output
 
     def backward(self, gradient: np.array, learning_rate: float,
@@ -36,7 +42,7 @@ class ConvolutionLayer(Layer):
 
         final_gradient = np.zeros(self.filters.shape)
         for im_region, i, j in self.__iterate_regions__(self.last_input):
-            for f in range(self.num_filters):
+            for f in range(self.channels):
                 final_gradient[f] += gradient[i, j, f] * im_region
 
         self.update_weight(learning_rate, final_gradient)

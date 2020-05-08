@@ -29,9 +29,9 @@ class NeuralNetwork(SupervisedModel):
         self.stopping_condition = stopping_condition
         self.regularization_function = regularization_function
         self.optimizer = optimizer
-        self.__add_optimizer()
+        self._add_optimizer()
 
-    def __add_optimizer(self):
+    def _add_optimizer(self):
         for layer in self.layers:
             layer.add_optimizer(self.optimizer.copy_instance())
 
@@ -90,7 +90,7 @@ class NeuralNetwork(SupervisedModel):
         return x_input
 
     def back_propagation(self, result, expected):
-        gradient = self.cost_function.calculate_gradient(result, expected)  # [num_out]x[num_examples]
+        gradient = self.cost_function.calculate_gradient(result, expected)
         for layer in self.layers[::-1]:
             gradient = layer.backward(gradient, self.learning_rate, self.regularization_function)
 

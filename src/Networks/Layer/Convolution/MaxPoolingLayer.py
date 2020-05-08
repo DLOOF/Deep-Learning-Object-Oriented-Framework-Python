@@ -22,15 +22,20 @@ class MaxPoolingLayer(Layer):
 
     def forward(self, x_input: np.array) -> np.array:
         self.last_input = x_input
+        
+        output = [] 
+        for ex in x_input:
+            h, w, num_filters = ex.shape
+            polling = np.zeros((h // 2, w // 2, num_filters))
+    
+            for im_region, i, j in self.__iterate_regions__(ex):
+                polling[i, j] = np.amax(im_region, axis=(0, 1))
 
-        # we assume that the previous layer was convolution layer
-        h, w, num_filters = x_input.shape
-        output = np.zeros((h // 2, w // 2, num_filters))
+            output.append(polling)
 
-        for im_region, i, j in self.__iterate_regions__(x_input):
-            output[i, j] = np.amax(im_region, axis=(0, 1))
-        self.last_output = output
-        return self.last_output.flatten()
+        self.last_output = np.array(output)
+
+        return self.last_output
 
     def backward(self, gradient: np.array, learning_rate: float,
                  regularization_function: NormRegularizationFunction) -> np.array:
