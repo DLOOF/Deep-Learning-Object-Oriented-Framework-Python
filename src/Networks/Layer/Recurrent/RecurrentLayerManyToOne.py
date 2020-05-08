@@ -6,11 +6,10 @@ from src.Networks.Layer.Layer import Layer
 from src.Regularizations import NormRegularizationFunction
 
 
-class ConvolutionLayer(Layer):
-    # FIXME: In this moment this class is a convolution filter 3x3
+class RecurrentLayerManyToOne(Layer):
 
     def __init__(self, num_neurons, num_output,
-                 activation_function: ActivationFunction = TanH,
+                 activation_function: ActivationFunction = TanH(),
                  initialization_function: InitializationFunction = Random()):
         super().__init__()
         self.num_neurons = num_neurons
@@ -20,34 +19,39 @@ class ConvolutionLayer(Layer):
         self.last_inputs = None
 
         self.w = initialization_function.initialize(num_neurons, num_neurons)
-        self.u = None
+        self.u = None # since the input size is not known, it is declared on the first iteration
         self.v = initialization_function.initialize(num_output, num_neurons)
 
         self.b = np.zeros((num_neurons, 1))
         self.c = np.zeros((num_output, 1))
 
-        self.hs = []
+        self.hidden_states = []
 
     def forward(self, x_input: np.array) -> np.array:
         self.__init_weight_late__(x_input)
         self.last_inputs = x_input
 
-        h = np.zeros((self.num_neurons, 1))
-        self.hs.append(h)
+        batch_size, sequence_length, _ = x_input.shape
 
-        for x in x_input:
-            h = self.activation_function.calculate(self.u @ x + self.w @ h + self.b)
-            self.hs.append(h)
+        h = np.zeros((batch_size, self.num_neurons))
+        self.hidden_states.append(h)
 
-        y = self.v @ h + self.c
+        for t in range(sequence_length):
+            x = x_input[:,t,:]
+            print(x.shape)
+            a = x @ self.u.T
+            a += h @ self.w.T
+            a += self.b.T
+            h = self.activation_function.calculate(a)
+            self.hidden_states.append(h)
 
-        return y
+        o = h @ self.v.T + self.c.T
+
+        return o
 
     def backward(self, gradient: np.array, learning_rate: float,
                  regularization_function: NormRegularizationFunction) -> np.array:
-        n = len(self.last_inputs)
-
-        dv = gradient @ self.hs[n]
+        dv = gradient @ self.hidden_states[-1]
 
         dw = np.zeros(self.w.shape)
         du = np.zeros(self.u.shape)
@@ -57,35 +61,36 @@ class ConvolutionLayer(Layer):
 
         dh = self.v @ gradient
 
-        for i, h in enumerate(self.hs[::-1]):
-            temp = self.activation_function.calculate_gradient(self.hs[i + 1]) * dh
+        for t, h in enumerate(self.hidden_states[::-1]):
+            temp = np.multiply(self.activation_function.calculate_gradient(self.hidden_states[t + 1]), dh)
 
             db += temp
 
             dw += temp @ h.T
-            du += temp @ self.last_inputs[i].T
+            du += temp @ self.last_inputs[t].T
 
             dh = self.w @ temp
 
         for d in [du, dw, dv, db, dc]:
             np.clip(d, -1, 1, out=d)
 
-        self.w += - learning_rate * dw
-        self.u += - learning_rate * du
-        self.v += - learning_rate * dv
-
-        self.b += - learning_rate * db
-        self.c += - learning_rate * dc
+        self.update_weight(learning_rate, [dw, du, dv])
+        self.update_bias(learning_rate, [db, dc])
 
     def update_weight(self, learning_rate: float, grads: np.array):
-        pass
+        dw, du, dv = grads
+        self.w += self.optimizer.calculate_weight(dw, learning_rate)
+        self.u += self.optimizer.calculate_weight(du, learning_rate)
+        self.v += self.optimizer.calculate_weight(dv, learning_rate)
 
     def update_bias(self, learning_rate: float, grads: np.array):
-        pass
+        db, dc = grads
+        self.b += self.optimizer.calculate_bias(db, learning_rate)
+        self.c += self.optimizer.calculate_bias(dc, learning_rate)
 
     def __str__(self):
         return f"rnn-{self.num_neurons}"
 
     def __init_weight_late__(self, x_input):
         if self.u is None:
-            self.u = self.initialization_function.initialize(self.num_neurons, x_input.shape[0])
+            self.u = self.initialization_function.initialize(self.num_neurons, x_input.shape[-1])

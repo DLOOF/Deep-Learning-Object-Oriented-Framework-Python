@@ -33,19 +33,19 @@ class MiniBatch(BatchFunction):
 
     def __init__(self, input_data: np.array, expected_output: np.array, batch_size: int):
         super().__init__(input_data, expected_output)
-        assert 1 <= batch_size <= input_data.shape[1]
+        assert 1 <= batch_size <= input_data.shape[0]
         n = input_data.shape[0]
         self.batch_size = batch_size
 
     def get_batch(self) -> Tuple[np.array, np.array]:
-        examples, output_size = self.input_data.shape
+        examples, *output_size = self.input_data.shape
 
-        joined = np.hstack((self.input_data, self.expected_output))
-        np.random.shuffle(joined)
+        idxs = np.arange(examples, dtype=np.int32)
+        np.random.shuffle(idxs)
 
         # TODO: let the batch size be for any size, now is requiring that is a divisor of n
-        for batch in np.vsplit(joined, examples / self.batch_size):
-            input_batch, output_batch = np.hsplit(batch, [output_size])
+        for batch_idxs in np.hsplit(idxs, examples / self.batch_size):
+            input_batch, output_batch = self.input_data[batch_idxs,:], self.expected_output[batch_idxs,:]
             yield input_batch, output_batch
 
 
