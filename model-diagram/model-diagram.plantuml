@@ -1,76 +1,69 @@
 @startuml
 !pragma teoz true
-skinparam shadowing false
+' skinparam shadowing false
 ' skinparam monochrome true
 ' hide footbox
 hide empty members
 
+' CostFunctions #01c472
+' BatchFunctions #c15360
+' Optimizers #528e8c
+' RecurrentLayer #e91451
+' InitializationFunctions #8da83e
+' ConvolutionLayers #6865f0
+' ActivationFunctions #c4a499
+' Regularization #8b9bdc
 
 SupervisedModel <|-- NeuralNetwork
 
 
 Layer <|-- ClassicLayer
-Layer <|-- ConvolutionLayer
-Layer <|-- PoolingLayer
-Layer <|-- Recurrent
 
-PoolingLayer <|-- MaxPooling
-PoolingLayer <|-- AvgPooling
+
+package RecurrentLayer {
+abstract class Recurrent
+
+Layer <|-- Recurrent
 
 Recurrent <|-- LSTM
 Recurrent <|-- SimpleRNN
+}
 
-
+package InitializationFunctions {
 Layer --> "1" InitializationFunction: initFunction >
 
-
+abstract class InitializationFunction {
+	{abstract} + initialize(x: int, y: int): Matrix
+}
 
 InitializationFunction <|-- Random
 InitializationFunction <|-- He
 InitializationFunction <|-- Xavier
 InitializationFunction <|-- Other
 
+}
 
-
-NeuralNetwork -- "1" CostFunction : costFunction >
 NeuralNetwork --> "*" Layer : hiddenLayers >
 
-Layer --> "1" ActivationFunction : activationFunction >
+package CostFunctions {
+NeuralNetwork -- "1" CostFunction : costFunction >
 
+
+abstract class CostFunction  {
+      {abstract} + calculate(value, expected_value): float
+      {abstract} + calculateGradient(value, expected_value): Vector
+}
 
 CostFunction <|-- MeanAbsoluteError
 CostFunction <|-- MeanSquaredError
 CostFunction <|-- CrossEntropy
 CostFunction <|-- BinaryCrossEntropy
-
-ActivationFunction <|-- ReLU
-ActivationFunction <|-- Sigmoid
-ActivationFunction <|-- TanH
-ActivationFunction <|-- Softmax
+}
 
 
-Layer <|-- Dropout
 
 SupervisedModel <|-- BaggingRegularization
-BaggingRegularization --> "1..*" SupervisedModel : models >
-
-
-
-NeuralNetwork --> "0..1" NormPenaltyRegularization: regularizationFunction >
-
-
-
-NormPenaltyRegularization <|-- L1WeightDecay
-NormPenaltyRegularization <|-- L2WeightDecay
 ' CostFunction --> "0..1" NormPenaltyRegularization : regularizationFunction >
-
-
-
-NeuralNetwork --> "1" BatchFunction: batchFunction >
-
-BatchFunction <|-- BatchMode
-BatchFunction <|-- MiniBatch
-MiniBatch <|-- MiniBatchNormalized
 
 
 abstract class SupervisedModel {
@@ -89,16 +82,6 @@ class NeuralNetwork {
       + backprop(output, expected): Tuple[List[Matrix],List[Vector]]
 }
 
-abstract class CostFunction {
-      {abstract} + calculate(value, expected_value): float
-      {abstract} + calculateGradient(value, expected_value): Vector
-}
-
-class MeanAbsoluteError
-class MeanSquaredError
-class CrossEntropy
-class BinaryCrossEntropy
-
 abstract class Layer {
       - bias: Vector
       - weights: Matrix
@@ -110,37 +93,37 @@ abstract class Layer {
       {abstract} + update_bias(learning_rate: float, grads: Vector): void
 }
 
-class ClassicLayer
+package ConvolutionLayers {
 class ConvolutionLayer
-class Dropout
-
-abstract class Recurrent
-class LSTM
-class SimpleRNN
 
 abstract class PoolingLayer
-class MaxPooling
-class AvgPooling
+Layer <|-- ConvolutionLayer
+Layer <|-- PoolingLayer
 
+PoolingLayer <|-- MaxPooling
+PoolingLayer <|-- AvgPooling
+}
 
+package ActivationFunctions {
 abstract class ActivationFunction {
       {abstract} + calculate(...): Vector
       {abstract} + calculateGradient(...): Vector
 }
 
-abstract class InitializationFunction {
-	 {abstract} + initialize(x: int, y: int): Matrix
+Layer --> "1" ActivationFunction : activationFunction >
+
+ActivationFunction <|-- ReLU
+ActivationFunction <|-- Sigmoid
+ActivationFunction <|-- TanH
+ActivationFunction <|-- Softmax
 }
 
-class Random
-class He
-class Xavier
-class Other
-
-
+package Regularization {
 class BaggingRegularization {
       + _(models: List[SupervizedModels])
 }
+
+BaggingRegularization --> "1..*" SupervisedModel : models >
 
 abstract class NormPenaltyRegularization {
 	 {abstract} + calculate(layer: Layer): float
@@ -148,9 +131,15 @@ abstract class NormPenaltyRegularization {
 	 {abstract} + calculateGradientBiase(layer: Layer): Vector
 }
 
-class L1WeightDecay
-class L2WeightDecay
+NeuralNetwork --> "0..1" NormPenaltyRegularization: regularizationFunction >
 
+NormPenaltyRegularization <|-- L1WeightDecay
+NormPenaltyRegularization <|-- L2WeightDecay
+
+Layer <|-- Dropout
+}
+
+package BatchFunctions {
 abstract class BatchFunction {
 	 {abstract} + _(input_data: Matrix, expected_output: Matrix): void
 	 {abstract} + get_batch(): Tuple[Matrix, Matrix]
@@ -163,10 +152,15 @@ class MiniBatchNormalized {
       {static} - epsilon: float
 }
 
+NeuralNetwork --> "1" BatchFunction: batchFunction >
+
+BatchFunction <|-- BatchMode
+BatchFunction <|-- MiniBatch
+MiniBatch <|-- MiniBatchNormalized
+}
+
+package Optimizers {
 abstract class Optimizer
-class Adam
-class AdaGrad
-class RMSProp
 
 NeuralNetwork --> "1" Optimizer
 
@@ -175,5 +169,8 @@ Optimizer <|-- RMSProp
 Optimizer <|-- AdaGrad
 Optimizer <|-- SGD
 Optimizer <|-- SGDMomentum
+}
+
+
 
 @enduml
