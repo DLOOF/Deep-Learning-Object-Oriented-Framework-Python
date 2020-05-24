@@ -50,8 +50,8 @@ NeuralNetwork -- "1" CostFunction : costFunction >
 
 
 abstract class CostFunction  {
-      {abstract} + calculate(value: Vector, expected_value: Vector): Vector
-      {abstract} + calculateGradient(value: Vector, expected_value: Vector): Vector
+      {abstract} + calculate(value: Vector, expectedValue: Vector): Vector
+      {abstract} + calculate_gradient(value: Vector, expectedValue: Vector): Vector
 }
 
 CostFunction <|-- MeanAbsoluteError
@@ -88,9 +88,9 @@ abstract class Layer {
       - units: int
       
       {abstract} + forward(input: Vector): Vector
-      {abstract} + backward(gradient: Vector, learning_rate: float): Vector
-      {abstract} + update_weight(learning_rate: float, grads: Vector): void
-      {abstract} + update_bias(learning_rate: float, grads: Vector): void
+      {abstract} + backward(gradient: Vector, learningRate: float): Vector
+      {abstract} + update_weight(learningRate: float, grads: Vector): void
+      {abstract} + update_bias(learningRate: float, grads: Vector): void
 }
 
 package ConvolutionLayers {
@@ -112,7 +112,7 @@ PoolingLayer <|-- AvgPooling
 package ActivationFunctions {
 abstract class ActivationFunction {
       {abstract} + calculate(value: Vector): Vector
-      {abstract} + calculateGradient(value: Vector): Vector
+      {abstract} + calculate_gradient(value: Vector): Vector
 }
 
 Layer --> "1" ActivationFunction : activationFunction >
@@ -132,8 +132,8 @@ BaggingRegularization --> "1..*" SupervisedModel : models >
 
 abstract class NormPenaltyRegularization {
 	 {abstract} + calculate(layer: Layer): float
-	 {abstract} + calculateGradientWeight(layer: Layer): Matrix
-	 {abstract} + calculateGradientBiase(layer: Layer): Vector
+	 {abstract} + calculate_gradientWeight(layer: Layer): Matrix
+	 {abstract} + calculate_gradientBiase(layer: Layer): Vector
 }
 
 NeuralNetwork --> "0..1" NormPenaltyRegularization: regularizationFunction >
