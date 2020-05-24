@@ -100,6 +100,11 @@ abstract class PoolingLayer
 Layer <|-- ConvolutionLayer
 Layer <|-- PoolingLayer
 
+Layer <|-- ReshapeLayer
+
+ReshapeLayer <|-- FlattenLayer
+ReshapeLayer <|-- UnflattenLayer
+
 PoolingLayer <|-- MaxPooling
 PoolingLayer <|-- AvgPooling
 }
