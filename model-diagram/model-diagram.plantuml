@@ -50,8 +50,8 @@ NeuralNetwork -- "1" CostFunction : costFunction >
 
 
 abstract class CostFunction  {
-      {abstract} + calculate(value, expected_value): float
-      {abstract} + calculateGradient(value, expected_value): Vector
+      {abstract} + calculate(value: Vector, expected_value: Vector): Vector
+      {abstract} + calculateGradient(value: Vector, expected_value: Vector): Vector
 }
 
 CostFunction <|-- MeanAbsoluteError
@@ -67,19 +67,19 @@ SupervisedModel <|-- BaggingRegularization
 
 
 abstract class SupervisedModel {
-      {abstract} + train(input: Vector, expectedOutput: Vector): void
+      {abstract} + train(input: Vector, expectedOutput: Vector, batchFunction: BatchFunction): void
       {abstract} + predict(input: Vector): Vector
 }
 
 class NeuralNetwork {
-      - num_inputs: int
-      - num_ouputs: int
+      - layers: Layer[]
+      - costFunction: CostFunction
       - learning_rate: float
-      - iterations: int
-      - regularization_rate: float
+      - epochs: int
+      - regularization_function: NormRegularizationFunction
+      - optimizer: Optimizer
 
-      + train(input: Vector, expectedOutput: Vector, batch_function: BatchFunction): void
-      + backprop(output, expected): Tuple[List[Matrix],List[Vector]]
+      - backprop(output, expected): void
 }
 
 abstract class Layer {
@@ -111,8 +111,8 @@ PoolingLayer <|-- AvgPooling
 
 package ActivationFunctions {
 abstract class ActivationFunction {
-      {abstract} + calculate(...): Vector
-      {abstract} + calculateGradient(...): Vector
+      {abstract} + calculate(value: Vector): Vector
+      {abstract} + calculateGradient(value: Vector): Vector
 }
 
 Layer --> "1" ActivationFunction : activationFunction >
@@ -146,7 +146,9 @@ Layer <|-- Dropout
 
 package BatchFunctions {
 abstract class BatchFunction {
-	 {abstract} + _(input_data: Matrix, expected_output: Matrix): void
+      - inputData: Matrix
+      - expectedOutput: Matrix
+
 	 {abstract} + get_batch(): Tuple[Matrix, Matrix]
 }
 
@@ -165,7 +167,10 @@ MiniBatch <|-- MiniBatchNormalized
 }
 
 package Optimizers {
-abstract class Optimizer
+abstract class Optimizer{
+      + calculate_weight(grad: Vector, learningRate: float):
+      + calculate_bias(grad: Vector, learningRate: float):
+}
 
 NeuralNetwork --> "1" Optimizer
 

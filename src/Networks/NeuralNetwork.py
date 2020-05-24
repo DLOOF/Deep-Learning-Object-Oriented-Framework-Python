@@ -53,7 +53,7 @@ class NeuralNetwork(SupervisedModel):
 
             for j, (batch_input, batch_expected) in enumerate(batch_function.get_batch()):
                 output = self.predict(batch_input)
-                self.back_propagation(output, batch_expected)
+                self._back_propagation(output, batch_expected)
 
                 if j % 1 == 0 and j != 0:
                     # regularization_penalty = 0.0
@@ -88,7 +88,7 @@ class NeuralNetwork(SupervisedModel):
             x_input = layer.forward(x_input)
         return x_input
 
-    def back_propagation(self, result, expected):
+    def _back_propagation(self, result, expected):
         gradient = self.cost_function.calculate_gradient(result, expected)
         for layer in self.layers[::-1]:
             gradient = layer.backward(gradient, self.learning_rate, self.regularization_function)
