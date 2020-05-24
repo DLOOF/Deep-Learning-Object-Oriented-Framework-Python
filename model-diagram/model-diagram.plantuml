@@ -86,19 +86,37 @@ abstract class Layer {
       - bias: Vector
       - weights: Matrix
       - units: int
+      - optimizer: Optimizer
       
       {abstract} + forward(input: Vector): Vector
       {abstract} + backward(gradient: Vector, learningRate: float): Vector
       {abstract} + update_weight(learningRate: float, grads: Vector): void
       {abstract} + update_bias(learningRate: float, grads: Vector): void
+      + set_optimizer(optimizer: Optimizer): void
+
 }
 
 package ConvolutionLayers {
-class ConvolutionLayer
+class Convolution2DLayer {
+      - channels: int
+      - filterSize: int
+      - filters: Tensor
+}
 
-abstract class PoolingLayer
-Layer <|-- ConvolutionLayer
+class UnflattenLayer {
+      - width: int
+      - height: int
+}
+
+abstract class PoolingLayer {
+      - poolSize: [int, int]
+      - stride: int
+      ' - padding: Padding
+}
+Layer <|-- Convolution2DLayer
 Layer <|-- PoolingLayer
+
+abstract class ReshapeLayer
 
 Layer <|-- ReshapeLayer
 
@@ -115,7 +133,7 @@ abstract class ActivationFunction {
       {abstract} + calculate_gradient(value: Vector): Vector
 }
 
-Layer --> "1" ActivationFunction : activationFunction >
+Layer --> "0..1" ActivationFunction : activationFunction >
 
 ActivationFunction <|-- ReLU
 ActivationFunction <|-- Sigmoid
@@ -131,9 +149,11 @@ class BaggingRegularization {
 BaggingRegularization --> "1..*" SupervisedModel : models >
 
 abstract class NormPenaltyRegularization {
+      - regularizationRate: float
+
 	 {abstract} + calculate(layer: Layer): float
-	 {abstract} + calculate_gradientWeight(layer: Layer): Matrix
-	 {abstract} + calculate_gradientBiase(layer: Layer): Vector
+	 {abstract} + calculate_gradient_weight(layer: Layer): Matrix
+	 {abstract} + calculate_gradient_bias(layer: Layer): Vector
 }
 
 NeuralNetwork --> "0..1" NormPenaltyRegularization: regularizationFunction >
@@ -142,6 +162,10 @@ NormPenaltyRegularization <|-- L1WeightDecay
 NormPenaltyRegularization <|-- L2WeightDecay
 
 Layer <|-- Dropout
+
+class Dropout {
+      - dropoutRate: float
+}
 }
 
 package BatchFunctions {
