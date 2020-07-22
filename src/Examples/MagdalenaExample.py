@@ -1,7 +1,9 @@
 import os
 from functools import lru_cache
 
+import matplotlib.pyplot as plt
 import pandas as pd
+from matplotlib.pyplot import figure
 from tensorflow.keras.preprocessing import timeseries_dataset_from_array
 
 from src.ActivationFunctions.ActivationFunction import Relu
@@ -165,16 +167,16 @@ class MagdalenaExample(ExampleTemplate):
 
     def define_architecture(self):
         self.architecture = [
-            ClassicLayer(8, Relu()),
+            ClassicLayer(8, Relu(), Xavier()),
             # TODO add BatchNormalization
-            ClassicLayer(5, Relu()),
-            ClassicLayer(4, Relu()),
-            ClassicLayer(7, Relu()),
-            ClassicLayer(6, Relu()),
-            ClassicLayer(5, Relu()),
-            ClassicLayer(10, Relu()),
-            ClassicLayer(5, Relu()),
-            ClassicLayer(1, Relu()),
+            ClassicLayer(5, Relu(), Xavier()),
+            ClassicLayer(4, Relu(), Xavier()),
+            ClassicLayer(7, Relu(), Xavier()),
+            ClassicLayer(6, Relu(), Xavier()),
+            ClassicLayer(5, Relu(), Xavier()),
+            ClassicLayer(10, Relu(), Xavier()),
+            ClassicLayer(5, Relu(), Xavier()),
+            ClassicLayer(1, Relu(), Xavier()),
         ]
 
         self.cost_function = MeanSquaredError()
@@ -182,23 +184,34 @@ class MagdalenaExample(ExampleTemplate):
     def define_training_hyperparameters(self):
         self.metrics = [MseMetric()]
         self.callbacks = [GraphicCallback()]
-        self.learning_rate = 0.008
-        self.iterations = 100
-        self.batch_function = MiniBatch(self.training_data, self.expected_output, 2048)
+        self.learning_rate = 0.01
+        self.iterations = 10
+        self.batch_function = MiniBatch(self.training_data, self.expected_output, 256)
         self.optimizer = Adam()
 
     def run_tests(self):
-        _, _, x_test, y_test = self.get_data()
-        import random
-        errors = []
-        for x, y in random.sample(list(zip(x_test, y_test)), k=2000):
-            # print(x, y, sep="\t")
-            y_predicted = self.neural_net.predict(x)
-            d = y - y_predicted
-            error = np.linalg.norm(d, 2)
-            errors.append(error)
+        train_sequence, y_train_sequence, validation_sequence, y_validation_sequence = self.get_data()
 
-        print("Mean error %.3f" % np.mean(np.asarray(errors)))
+        self.plot_serie(train_sequence, y_validation_sequence, "training")
+
+        self.plot_serie(validation_sequence, y_validation_sequence, "validation")
+
+    def plot_serie(self, validation_sequence, y_validation_sequence, types):
+        metric = MseMetric()
+        val_predicted = self.neural_net.predict(validation_sequence)
+        val_predicted = self.smooth_output(val_predicted)
+        f = figure(num=None, figsize=(30, 6), dpi=80, facecolor='w', edgecolor='k')
+        plt.plot(val_predicted)
+        plt.plot(y_validation_sequence)
+        plt.show()
+        plt.close(f)
+        print(f"{types} - MSE: {metric.calculate(val_predicted, y_validation_sequence):,}")
+
+    def smooth_output(self, train_predicted):
+        train_predicted = pd.DataFrame(train_predicted)
+        train_predicted = train_predicted.rolling(window=10, min_periods=0).mean()
+        train_predicted = train_predicted.to_numpy()
+        return train_predicted
 
 
 if __name__ == '__main__':

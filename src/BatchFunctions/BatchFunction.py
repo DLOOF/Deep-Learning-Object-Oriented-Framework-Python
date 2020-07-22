@@ -26,7 +26,7 @@ class BatchMode(BatchFunction):
         super().__init__(input_data, expected_output)
 
     def get_batch(self) -> Tuple[np.array, np.array]:
-        yield self.input_data, self.expected_output
+        yield self.input_data, np.atleast_2d(self.expected_output).T
 
 
 class MiniBatch(BatchFunction):
@@ -34,7 +34,7 @@ class MiniBatch(BatchFunction):
     def __init__(self, input_data: np.array, expected_output: np.array, batch_size: int):
         super().__init__(input_data, expected_output)
         assert 1 <= batch_size <= input_data.shape[0]
-        n = input_data.shape[0]
+
         self.batch_size = batch_size
         self.input_data = np.atleast_2d(self.input_data)
         self.expected_output = np.atleast_2d(self.expected_output).T
