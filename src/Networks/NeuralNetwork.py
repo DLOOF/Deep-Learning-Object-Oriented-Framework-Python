@@ -8,7 +8,8 @@ from src.CostFunctions import CostFunction
 from src.Metrics import Metrics
 from src.Networks.SupervisedModel import SupervisedModel
 from src.Optimizers.Optimizers import Optimizer, SGD
-from src.Regularizations.NormRegularizationFunction import NormRegularizationFunction, L2WeightDecay
+from src.Regularizations.NormRegularizationFunction import NormRegularizationFunction, L2WeightDecay, \
+    VoidNormRegularizationFunction
 
 
 class NeuralNetwork(SupervisedModel):
@@ -19,7 +20,7 @@ class NeuralNetwork(SupervisedModel):
                  learning_rate: float = 0.001,
                  epochs: int = 1000,
                  callbacks: [Callback] = [],
-                 regularization_function: NormRegularizationFunction = L2WeightDecay(0.01),
+                 regularization_function: NormRegularizationFunction = VoidNormRegularizationFunction(1),
                  optimizer: Optimizer = SGD(),
                  metrics: [Metrics] = []
                  ):

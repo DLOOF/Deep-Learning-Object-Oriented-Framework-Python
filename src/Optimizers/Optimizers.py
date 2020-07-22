@@ -114,4 +114,9 @@ class Adam(Optimizer):
         s_hat = np.divide(s, 1.0 - self.p1 ** t)
         r_hat = np.divide(r, 1.0 - self.p2 ** t)
 
-        return - learning_rate * np.divide(s_hat, np.sqrt(r_hat) + self.delta), [t, s, r]
+        gradient = np.divide(s_hat, np.sqrt(r_hat) + self.delta)
+        norm = np.linalg.norm(gradient)
+        if norm > 1.0:
+            gradient /= norm
+
+        return - learning_rate * gradient, [t, s, r]

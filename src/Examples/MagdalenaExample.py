@@ -1,8 +1,10 @@
 import os
-import pandas as pd
 from functools import lru_cache
 
-from src.ActivationFunctions.ActivationFunction import Sigmoid, TanH, Relu
+import pandas as pd
+from tensorflow.keras.preprocessing import timeseries_dataset_from_array
+
+from src.ActivationFunctions.ActivationFunction import Relu
 from src.BatchFunctions.BatchFunction import MiniBatch
 from src.Callbacks.Callback import GraphicCallback
 from src.CostFunctions.CostFunction import *
@@ -10,10 +12,6 @@ from src.DataTools.LazyLoader import LazyLoader
 from src.Examples.ExampleTemplate import ExampleTemplate
 from src.Metrics.Metrics import MseMetric
 from src.Networks.Layer.ClassicLayer import ClassicLayer, Xavier
-from src.Networks.Layer.Convolution.Convolution2DLayer import Convolution2DLayer
-from src.Networks.Layer.Convolution.FlattenLayer import FlattenLayer
-from src.Networks.Layer.Convolution.MaxPoolingLayer import MaxPoolingLayer
-from src.Networks.Layer.Convolution.UnFlattenLayer import UnFlattenLayer
 from src.Optimizers.Optimizers import Adam
 
 
@@ -52,7 +50,28 @@ class MagdalenaExample(ExampleTemplate):
 
         return pandas_files, summary
 
+    def create_sequence(self, X, Y, sequence_length):
+        return timeseries_dataset_from_array(
+            X,
+            Y,
+            sequence_length=sequence_length,
+            sequence_stride=1,
+            sampling_rate=1,
+            batch_size=1
+        )
+
+    def stack_all_sequences(self, sequence):
+        all_inputs = []
+        for batch in sequence:
+            inputs = batch
+            all_inputs.append(inputs.numpy())
+
+        return np.vstack(all_inputs)
+
     def _get_split_data(self, all_flows):
+        SEQUENCE_LENGTH = 120
+        FUTURE_DAYS = 15
+
         train = all_flows.loc['1990-01-01':'2010-12-31']
         X_train, Y_train = train, train[train.columns[-2]]
 
@@ -66,7 +85,19 @@ class MagdalenaExample(ExampleTemplate):
 
         X_val, Y_val = X_val.to_numpy(), Y_val.to_numpy()
 
-        return X_train, Y_train, X_val, Y_val
+        train_sequence = self.create_sequence(X_train, None, SEQUENCE_LENGTH)
+        validation_sequence = self.create_sequence(X_val, None, SEQUENCE_LENGTH)
+
+        train_sequence = self.stack_all_sequences(train_sequence)[:-FUTURE_DAYS]
+        validation_sequence = self.stack_all_sequences(validation_sequence)[:-FUTURE_DAYS]
+
+        train_sequence = train_sequence.reshape(train_sequence.shape[0], -1)
+        validation_sequence = validation_sequence.reshape(validation_sequence.shape[0], -1)
+
+        y_train_sequence = Y_train[SEQUENCE_LENGTH - 1:][FUTURE_DAYS:]
+        y_validation_sequence = Y_val[SEQUENCE_LENGTH - 1:][FUTURE_DAYS:]
+
+        return train_sequence, y_train_sequence, validation_sequence, y_validation_sequence
 
     @lru_cache()
     def get_data(self) -> np.array:
@@ -75,28 +106,29 @@ class MagdalenaExample(ExampleTemplate):
         OUTPUTS_FOLDER = BASE_DIR + '/Outputs/Calibration dataset'
         TEST_OUTPUTS_FOLDER = BASE_DIR + '/Outputs'
 
-        INITIAL_DATE = '1990-01-01'
-
-        input_folders = sorted(os.listdir(INPUTS_FOLDER))
-        input_folders = [INPUTS_FOLDER + '/' + folder for folder in input_folders]
-        print(">>> Input Folders <<<")
-        print("\n".join([f"[{i}] {folder}" for i, folder in enumerate(input_folders)]))
-
-        output_folders = sorted(os.listdir(OUTPUTS_FOLDER))
-        output_folders = [OUTPUTS_FOLDER + '/' + folder for folder in output_folders]
-        print(">>> Output Folders <<<")
-        print("\n".join([f"[{i}] {folder}" for i, folder in enumerate(output_folders)]))
-
-        pandas_inputs, isummary = self._get_excel_pandas(input_folders, INPUTS_FOLDER)
-
-        print(">>> Inputs <<<")
-        print(isummary)
+        input_folders, output_folders = self.setup_folders(INPUTS_FOLDER, OUTPUTS_FOLDER)
 
         pandas_outputs, osummary = self._get_excel_pandas(output_folders, OUTPUTS_FOLDER)
 
-        print(">>> OUTPUTS <<<")
-        print(osummary)
+        caudales_test = self.read_test_data(TEST_OUTPUTS_FOLDER)
 
+        all_flows = self.join_flow_data(caudales_test, pandas_outputs)
+
+        return self._get_split_data(all_flows)
+
+    def join_flow_data(self, caudales_test, pandas_outputs):
+        caudales = pandas_outputs[0][0].copy()
+        caudales_sheets = list(caudales.keys())
+        dataset = caudales[caudales_sheets[0]]
+        dataset = dataset.set_index('Fecha')
+        caudales_test.index.names = ['Fecha']
+        dataset.columns = caudales_test.columns
+        all_flows = pd.concat([dataset, caudales_test])
+        all_flows = all_flows.fillna(0)
+        all_flows = all_flows.rolling(window=7, min_periods=0).mean()
+        return all_flows
+
+    def read_test_data(self, TEST_OUTPUTS_FOLDER):
         with open(TEST_OUTPUTS_FOLDER + '/answers.csv', 'r') as csvfile:
             caudales_test_tmp = pd.read_csv(csvfile, index_col='Date', parse_dates=True)
             caudales_cols = caudales_test_tmp['Id'].unique()
@@ -113,25 +145,18 @@ class MagdalenaExample(ExampleTemplate):
 
             del caudales_test_tmp
             del caudales_cols
+        return caudales_test
 
-        caudales_test.describe()
-
-        caudales = pandas_outputs[0][0].copy()
-        caudales_sheets = list(caudales.keys())
-        dataset = caudales[caudales_sheets[0]]
-        dataset = dataset.set_index('Fecha')
-
-        caudales_test.index.names = ['Fecha']
-
-        dataset.columns = caudales_test.columns
-
-        all_flows = pd.concat([dataset, caudales_test])
-
-        all_flows = all_flows.fillna(0)
-
-        all_flows = all_flows.rolling(window=7, min_periods=0).mean()
-
-        return self._get_split_data(all_flows)
+    def setup_folders(self, INPUTS_FOLDER, OUTPUTS_FOLDER):
+        input_folders = sorted(os.listdir(INPUTS_FOLDER))
+        input_folders = [INPUTS_FOLDER + '/' + folder for folder in input_folders]
+        print(">>> Input Folders <<<")
+        print("\n".join([f"[{i}] {folder}" for i, folder in enumerate(input_folders)]))
+        output_folders = sorted(os.listdir(OUTPUTS_FOLDER))
+        output_folders = [OUTPUTS_FOLDER + '/' + folder for folder in output_folders]
+        print(">>> Output Folders <<<")
+        print("\n".join([f"[{i}] {folder}" for i, folder in enumerate(output_folders)]))
+        return input_folders, output_folders
 
     def define_data(self):
         x_train, y_train, x_test, y_test = self.get_data()
@@ -140,16 +165,16 @@ class MagdalenaExample(ExampleTemplate):
 
     def define_architecture(self):
         self.architecture = [
-            ClassicLayer(8, Relu(), Xavier()),
+            ClassicLayer(8, Relu()),
             # TODO add BatchNormalization
-            ClassicLayer(5, Relu(), Xavier()),
-            ClassicLayer(4, Relu(), Xavier()),
-            ClassicLayer(7, Relu(), Xavier()),
-            ClassicLayer(6, Relu(), Xavier()),
-            ClassicLayer(5, Relu(), Xavier()),
-            ClassicLayer(10, Relu(), Xavier()),
-            ClassicLayer(5, Relu(), Xavier()),
-            ClassicLayer(1, Relu(), Xavier()),
+            ClassicLayer(5, Relu()),
+            ClassicLayer(4, Relu()),
+            ClassicLayer(7, Relu()),
+            ClassicLayer(6, Relu()),
+            ClassicLayer(5, Relu()),
+            ClassicLayer(10, Relu()),
+            ClassicLayer(5, Relu()),
+            ClassicLayer(1, Relu()),
         ]
 
         self.cost_function = MeanSquaredError()
@@ -157,9 +182,9 @@ class MagdalenaExample(ExampleTemplate):
     def define_training_hyperparameters(self):
         self.metrics = [MseMetric()]
         self.callbacks = [GraphicCallback()]
-        self.learning_rate = 0.01
+        self.learning_rate = 0.008
         self.iterations = 100
-        self.batch_function = MiniBatch(self.training_data, self.expected_output, 256)
+        self.batch_function = MiniBatch(self.training_data, self.expected_output, 2048)
         self.optimizer = Adam()
 
     def run_tests(self):
@@ -177,6 +202,6 @@ class MagdalenaExample(ExampleTemplate):
 
 
 if __name__ == '__main__':
-    np.random.seed(0)
+    # np.random.seed(0)
     xor_example = MagdalenaExample("magdalena_example")
     xor_example.run()
