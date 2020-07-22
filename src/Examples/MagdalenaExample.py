@@ -4,9 +4,11 @@ from functools import lru_cache
 
 from src.ActivationFunctions.ActivationFunction import Sigmoid, TanH, Relu
 from src.BatchFunctions.BatchFunction import MiniBatch
+from src.Callbacks.Callback import GraphicCallback
 from src.CostFunctions.CostFunction import *
 from src.DataTools.LazyLoader import LazyLoader
 from src.Examples.ExampleTemplate import ExampleTemplate
+from src.Metrics.Metrics import MseMetric
 from src.Networks.Layer.ClassicLayer import ClassicLayer, Xavier
 from src.Networks.Layer.Convolution.Convolution2DLayer import Convolution2DLayer
 from src.Networks.Layer.Convolution.FlattenLayer import FlattenLayer
@@ -153,9 +155,11 @@ class MagdalenaExample(ExampleTemplate):
         self.cost_function = MeanSquaredError()
 
     def define_training_hyperparameters(self):
+        self.metrics = [MseMetric()]
+        self.callbacks = [GraphicCallback()]
         self.learning_rate = 0.01
-        self.iterations = 1000
-        self.batch_function = MiniBatch(self.training_data, self.expected_output, 100)
+        self.iterations = 100
+        self.batch_function = MiniBatch(self.training_data, self.expected_output, 256)
         self.optimizer = Adam()
 
     def run_tests(self):

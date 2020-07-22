@@ -36,10 +36,11 @@ class MiniBatch(BatchFunction):
         assert 1 <= batch_size <= input_data.shape[0]
         n = input_data.shape[0]
         self.batch_size = batch_size
+        self.input_data = np.atleast_2d(self.input_data)
+        self.expected_output = np.atleast_2d(self.expected_output).T
 
     def get_batch(self) -> Tuple[np.array, np.array]:
         examples, *output_size = self.input_data.shape
-
         idxs = np.arange(examples, dtype=np.int32)
         np.random.shuffle(idxs)
 

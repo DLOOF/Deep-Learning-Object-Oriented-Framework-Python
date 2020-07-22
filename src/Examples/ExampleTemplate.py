@@ -21,13 +21,17 @@ class ExampleTemplate(ABC):
         self.optimizer = SGD()
         self.architecture = []
         self.batch_function: BatchFunction = None
+        self.metrics = []
+        self.callbacks = []
 
     def build_neuronal_net(self):
         self.neural_net = NeuralNetwork(self.architecture,
                                         self.cost_function,
                                         self.learning_rate,
                                         self.iterations,
-                                        optimizer=self.optimizer)
+                                        optimizer=self.optimizer,
+                                        metrics=self.metrics,
+                                        callbacks=self.callbacks)
 
     def train_and_save_nn(self):
         self.neural_net.train(self.training_data, self.expected_output, self.batch_function)
@@ -82,7 +86,8 @@ class ExampleTemplate(ABC):
         self.run_tests()
 
     def try_to_recover_old_training(self):
-        try:
-            self.load_net_from_file()
-        except:
-            self.train_and_save_nn()
+        self.train_and_save_nn()
+        # try:
+        #     pass
+        #     # self.load_net_from_file()
+        # except:
