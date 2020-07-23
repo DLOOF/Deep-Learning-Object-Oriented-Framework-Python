@@ -25,3 +25,4 @@ class GraphicCallback(Callback):
             n += 1
 
         plt.show()
+        plt.close(fig)

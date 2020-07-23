@@ -185,14 +185,14 @@ class MagdalenaExample(ExampleTemplate):
         self.metrics = [MseMetric()]
         self.callbacks = [GraphicCallback()]
         self.learning_rate = 0.01
-        self.iterations = 10
+        self.iterations = 50
         self.batch_function = MiniBatch(self.training_data, self.expected_output, 256)
         self.optimizer = Adam()
 
     def run_tests(self):
         train_sequence, y_train_sequence, validation_sequence, y_validation_sequence = self.get_data()
 
-        self.plot_serie(train_sequence, y_validation_sequence, "training")
+        self.plot_serie(train_sequence, y_train_sequence, "training")
 
         self.plot_serie(validation_sequence, y_validation_sequence, "validation")
 
