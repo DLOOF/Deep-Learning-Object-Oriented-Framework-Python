@@ -23,7 +23,7 @@ class MseMetric(Metric):
         self.name = "mse"
 
     def calculate(self, predicted: np.array, expected: np.array) -> float:
-        return np.power(predicted - expected, 2).mean()
+        return np.square(predicted - expected).mean()
 
 
 class MaeMetric(Metric):

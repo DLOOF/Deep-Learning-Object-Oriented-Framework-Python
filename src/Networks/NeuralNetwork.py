@@ -51,13 +51,10 @@ class NeuralNetwork(SupervisedModel):
               batch_function: BatchFunction = None,
               validation_data: [np.array] = None):
 
-        x_val, y_val = None, None
-
         NeuralNetwork.__validate_input(input_data, expected_output)
-        if validation_data is not None:
-            assert len(validation_data) == 2, f"validation data is invalid, should be a tuple (x, y)"
-            x_val, y_val = validation_data
-            NeuralNetwork.__validate_input(x_val, y_val)
+
+        x_val, y_val = None, None
+        x_val, y_val = self.validate_validation_data(validation_data, x_val, y_val)
 
         # ---------------------------------------
 
@@ -65,15 +62,13 @@ class NeuralNetwork(SupervisedModel):
         tic = time.time()
 
         epochs_metrics = {str(x): [] for x in self.metrics}
-        if x_val is not None:
-            for metric in self.metrics:
-                epochs_metrics[f"val_{metric}"] = []
+        self.init_validation_metrics(epochs_metrics, x_val)
 
         # by default use batch mode (e.g. the whole dataset at once)
         if batch_function is None:
             batch_function = BatchMode(input_data, expected_output)
 
-        for i in range(self.epochs):
+        for epoch in range(self.epochs):
             for j, (batch_input, batch_expected) in enumerate(batch_function.get_batch()):
                 output = self.predict(batch_input)
                 self._back_propagation(output, batch_expected)
@@ -81,23 +76,38 @@ class NeuralNetwork(SupervisedModel):
                 # for metric in self.metrics:
                 #     print(f"{metric}: {metric.calculate(output, batch_expected)}")
 
-            for metric in self.metrics:
-                result = metric.calculate(self.predict(input_data), expected_output)
-                epoch_str = f"EPOCH {i} ---- {metric}: {result:,}"
-
-                if x_val is not None:
-                    result_val = metric.calculate(self.predict(x_val), y_val)
-                    epoch_str += f" val_{metric}: {result_val:,}"
-                    epochs_metrics[f"val_{metric}"].append(result_val)
-
-                print(epoch_str)
-                epochs_metrics[str(metric)].append(result)
+            self.register_epoch_metrics(epochs_metrics, expected_output, epoch, input_data, x_val, y_val)
 
             for c in self.callbacks:
                 c.call(epochs_metrics)
 
         toc = time.time()
         print(f"Training finished! {toc - tic}")
+
+    def register_epoch_metrics(self, epochs_metrics, expected_output, i, input_data, x_val, y_val):
+        for metric in self.metrics:
+            result = metric.calculate(self.predict(input_data), expected_output)
+            epoch_str = f"EPOCH {i} ---- {metric}: {result:,}"
+
+            if x_val is not None:
+                result_val = metric.calculate(self.predict(x_val), y_val)
+                epoch_str += f" val_{metric}: {result_val:,}"
+                epochs_metrics[f"val_{metric}"].append(result_val)
+
+            print(epoch_str)
+            epochs_metrics[str(metric)].append(result)
+
+    def init_validation_metrics(self, epochs_metrics, x_val):
+        if x_val is not None:
+            for metric in self.metrics:
+                epochs_metrics[f"val_{metric}"] = []
+
+    def validate_validation_data(self, validation_data, x_val, y_val):
+        if validation_data is not None:
+            assert len(validation_data) == 2, f"validation data is invalid, should be a tuple (x, y)"
+            x_val, y_val = validation_data
+            NeuralNetwork.__validate_input(x_val, y_val)
+        return x_val, y_val
 
     def predict(self, x_input: np.array) -> np.array:
         for layer in self.layers:

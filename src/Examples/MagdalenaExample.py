@@ -186,7 +186,7 @@ class MagdalenaExample(ExampleTemplate):
         self.metrics = [MseMetric()]
         self.callbacks = [GraphicCallback()]
         self.learning_rate = 0.01
-        self.iterations = 50
+        self.iterations = 20
         self.batch_function = MiniBatch(self.training_data, self.expected_output, 256)
         self.optimizer = Adam()
 
