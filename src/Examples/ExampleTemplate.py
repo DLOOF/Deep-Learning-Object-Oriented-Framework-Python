@@ -6,6 +6,7 @@ import numpy as np
 from src.BatchFunctions import BatchFunction
 from src.Networks.NeuralNetwork import NeuralNetwork
 from src.Optimizers.Optimizers import SGD
+from src.Regularizations.NormRegularizationFunction import NormRegularizationFunction, VoidNormRegularizationFunction
 
 
 class ExampleTemplate(ABC):
@@ -24,6 +25,7 @@ class ExampleTemplate(ABC):
         self.batch_function: BatchFunction = None
         self.metrics = []
         self.callbacks = []
+        self.regularization_function: NormRegularizationFunction = VoidNormRegularizationFunction()
 
     def build_neuronal_net(self):
         self.neural_net = NeuralNetwork(self.architecture,

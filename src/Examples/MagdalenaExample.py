@@ -6,7 +6,7 @@ import pandas as pd
 from matplotlib.pyplot import figure
 from tensorflow.keras.preprocessing import timeseries_dataset_from_array
 
-from src.ActivationFunctions.ActivationFunction import Relu
+from src.ActivationFunctions.ActivationFunction import Relu, ELU, Linear
 from src.BatchFunctions.BatchFunction import MiniBatch
 from src.Callbacks.Callback import GraphicCallback
 from src.CostFunctions.CostFunction import *
@@ -15,6 +15,7 @@ from src.Examples.ExampleTemplate import ExampleTemplate
 from src.Metrics.Metrics import MseMetric, MaeMetric
 from src.Networks.Layer.ClassicLayer import ClassicLayer, Xavier
 from src.Optimizers.Optimizers import Adam
+from src.Regularizations.NormRegularizationFunction import L2WeightDecay
 
 
 class MagdalenaExample(ExampleTemplate):
@@ -168,16 +169,16 @@ class MagdalenaExample(ExampleTemplate):
 
     def define_architecture(self):
         self.architecture = [
-            ClassicLayer(8, Relu(), Xavier()),
+            ClassicLayer(8, ELU(), Xavier()),
             # TODO add BatchNormalization
-            ClassicLayer(5, Relu(), Xavier()),
-            ClassicLayer(4, Relu(), Xavier()),
-            ClassicLayer(7, Relu(), Xavier()),
-            ClassicLayer(6, Relu(), Xavier()),
-            ClassicLayer(5, Relu(), Xavier()),
-            ClassicLayer(10, Relu(), Xavier()),
-            ClassicLayer(5, Relu(), Xavier()),
-            ClassicLayer(1, Relu(), Xavier()),
+            ClassicLayer(5, ELU(), Xavier()),
+            ClassicLayer(4, ELU(), Xavier()),
+            ClassicLayer(7, ELU(), Xavier()),
+            ClassicLayer(6, ELU(), Xavier()),
+            ClassicLayer(5, ELU(), Xavier()),
+            ClassicLayer(10, ELU(), Xavier()),
+            ClassicLayer(5, ELU(), Xavier()),
+            ClassicLayer(1, Linear(), Xavier()),
         ]
 
         self.cost_function = MeanSquaredError()
@@ -186,9 +187,10 @@ class MagdalenaExample(ExampleTemplate):
         self.metrics = [MseMetric()]
         self.callbacks = [GraphicCallback()]
         self.learning_rate = 0.01
-        self.iterations = 20
+        self.iterations = 50
         self.batch_function = MiniBatch(self.training_data, self.expected_output, 256)
         self.optimizer = Adam()
+        self.regularization_function = L2WeightDecay(0.001*5)
 
     def run_tests(self):
         train_sequence, y_train_sequence, validation_sequence, y_validation_sequence = self.get_data()

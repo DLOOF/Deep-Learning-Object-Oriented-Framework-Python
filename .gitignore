@@ -582,3 +582,4 @@ datasets/student-mat.csv
 datasets/train.csv
 
 /datasets/magdalena
+/datasets/*.zip

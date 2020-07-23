@@ -21,6 +21,17 @@ class ActivationFunction(ABC):
         pass
 
 
+class Linear(ActivationFunction):
+
+    def calculate_gradient(self, value: np.array) -> np.array:
+        return np.ones_like(value)
+
+    def calculate(self, value: np.array) -> np.array:
+        return value
+
+    def __str__(self):
+        return "L"
+
 class Relu(ActivationFunction):
 
     def calculate_gradient(self, value: np.array) -> np.array:
@@ -55,6 +66,22 @@ class TanH(ActivationFunction):
 
     def __str__(self):
         return "T"
+
+
+class ELU(ActivationFunction):
+
+    def __init__(self, alpha=1.0):
+        assert alpha >= 0.0, f"alpha should be greater than zero, got {alpha}"
+        self.alpha = alpha
+
+    def calculate(self, value: np.array) -> np.array:
+        return np.vectorize(lambda x: x if x >= 0 else self.alpha * (np.exp(x) - 1.))(value)
+
+    def calculate_gradient(self, value: np.array) -> np.array:
+        return np.vectorize(lambda x: 1 if x >= 0 else self.alpha * np.exp(x))(value)
+
+    def __str__(self):
+        return "ELU"
 
 
 class SoftMax(ActivationFunction):

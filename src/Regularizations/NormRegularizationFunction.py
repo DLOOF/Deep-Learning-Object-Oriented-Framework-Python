@@ -7,7 +7,7 @@ from src.Networks.Layer import Layer
 
 class NormRegularizationFunction(ABC):
 
-    def __init__(self, regularization_rate: float):
+    def __init__(self, regularization_rate: float = 0.0):
         self.regularization_rate = regularization_rate
 
     @abstractmethod
