@@ -12,7 +12,7 @@ from src.Callbacks.Callback import GraphicCallback
 from src.CostFunctions.CostFunction import *
 from src.DataTools.LazyLoader import LazyLoader
 from src.Examples.ExampleTemplate import ExampleTemplate
-from src.Metrics.Metrics import MseMetric
+from src.Metrics.Metrics import MseMetric, MaeMetric
 from src.Networks.Layer.ClassicLayer import ClassicLayer, Xavier
 from src.Optimizers.Optimizers import Adam
 
@@ -164,6 +164,7 @@ class MagdalenaExample(ExampleTemplate):
         x_train, y_train, x_test, y_test = self.get_data()
         self.training_data = x_train
         self.expected_output = y_train
+        self.validation_data = (x_test, y_test)
 
     def define_architecture(self):
         self.architecture = [

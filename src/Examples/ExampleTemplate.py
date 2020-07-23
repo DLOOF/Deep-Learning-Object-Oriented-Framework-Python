@@ -14,6 +14,7 @@ class ExampleTemplate(ABC):
         self.experiment_name = experiment_name
         self.expected_output = None
         self.training_data = None
+        self.validation_data = None
         self.learning_rate = None
         self.cost_function = None
         self.neural_net = None
@@ -34,7 +35,7 @@ class ExampleTemplate(ABC):
                                         callbacks=self.callbacks)
 
     def train_and_save_nn(self):
-        self.neural_net.train(self.training_data, self.expected_output, self.batch_function)
+        self.neural_net.train(self.training_data, self.expected_output, self.batch_function, self.validation_data)
         with open(f'{self.neural_net}.nn', 'wb') as file:
             pickle.dump(self.neural_net, file)
 

@@ -39,11 +39,35 @@ class NeuralNetwork(SupervisedModel):
         for layer in self.layers:
             layer.add_optimizer(self.optimizer.copy_instance())
 
-    def train(self, input_data: np.array, expected_output: np.array, batch_function: BatchFunction = None):
+    def __validate_input(input_data: np.array, output_data: np.array):
+        assert input_data is not None and output_data is not None, f"input and output should not be None"
+        assert len(input_data.shape) >= 1 and len(output_data.shape) >= 1, f"input {input_data.shape} or output {output_data.shape} is " \
+                                                                 f"invalid "
+        assert input_data.shape[0] == output_data.shape[0], f"batch dimension should be equal in input ({input_data.shape[0]}) and " \
+                                                  f"output ({output_data.shape[0]}) "
+
+    def train(self, input_data: np.array,
+              expected_output: np.array,
+              batch_function: BatchFunction = None,
+              validation_data: [np.array] = None):
+
+        x_val, y_val = None, None
+
+        NeuralNetwork.__validate_input(input_data, expected_output)
+        if validation_data is not None:
+            assert len(validation_data) == 2, f"validation data is invalid, should be a tuple (x, y)"
+            x_val, y_val = validation_data
+            NeuralNetwork.__validate_input(x_val, y_val)
+
+        # ---------------------------------------
+
         print("Starting training!")
         tic = time.time()
 
         epochs_metrics = {str(x): [] for x in self.metrics}
+        if x_val is not None:
+            for metric in self.metrics:
+                epochs_metrics[f"val_{metric}"] = []
 
         # by default use batch mode (e.g. the whole dataset at once)
         if batch_function is None:
@@ -59,7 +83,14 @@ class NeuralNetwork(SupervisedModel):
 
             for metric in self.metrics:
                 result = metric.calculate(self.predict(input_data), expected_output)
-                print(f"EPOCH {i} ---- {metric}: {result:,}")
+                epoch_str = f"EPOCH {i} ---- {metric}: {result:,}"
+
+                if x_val is not None:
+                    result_val = metric.calculate(self.predict(x_val), y_val)
+                    epoch_str += f" val_{metric}: {result_val:,}"
+                    epochs_metrics[f"val_{metric}"].append(result_val)
+
+                print(epoch_str)
                 epochs_metrics[str(metric)].append(result)
 
             for c in self.callbacks:
