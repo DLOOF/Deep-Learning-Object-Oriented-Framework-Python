@@ -39,7 +39,7 @@ abstract class InitializationFunction {
 InitializationFunction <|-- Random
 InitializationFunction <|-- He
 InitializationFunction <|-- Xavier
-InitializationFunction <|-- Other
+InitializationFunction <|-- He2
 
 }
 
@@ -205,6 +205,20 @@ Optimizer <|-- SGD
 Optimizer <|-- SGDMomentum
 }
 
+abstract class Callback {
+      + call(metrics_history: List[])
+}
 
+Callback <|-- GraphicCallback
+
+abstract class Metric {
+      + calculate(predicted: Vector, expected: Vector): float
+}
+
+Metric <|-- MseMetric
+Metric <|-- MaeMetric
+
+NeuralNetwork --> "*" Callback: "callbacks"
+NeuralNetwork --> "*" Metric: "metrics"
 
 @enduml
